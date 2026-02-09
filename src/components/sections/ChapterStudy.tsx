@@ -184,7 +184,7 @@ export default function ChapterStudy({
         {error && !loading && (
           <div className="max-w-md mx-auto px-4 py-20 text-center">
             <Icon name="error_outline" className="text-4xl text-accent-red mb-3" />
-            <p className="text-primary font-semibold mb-2">Couldn&apos;t load text</p>
+            <p className="text-primary font-semibold mb-2">Couldn't load text</p>
             <p className="text-warm-grey text-sm mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
@@ -273,7 +273,7 @@ export default function ChapterStudy({
             <h3 className="text-primary text-lg font-bold mb-2">Daily Insights</h3>
             <p className="text-warm-grey text-sm max-w-sm mx-auto">
               AI-generated infographics, podcast episodes, and deep-dive insights
-              for each day&apos;s study will appear here.
+              for each day's study will appear here.
             </p>
           </div>
         )}

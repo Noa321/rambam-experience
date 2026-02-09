@@ -61,7 +61,7 @@ export default function Library({ onNavigate }: LibraryProps) {
                   : "text-light-grey font-medium"
               }`}
             >
-              Today&apos;s Study
+              Today's Study
             </button>
           </div>
         </div>
@@ -137,7 +137,7 @@ export default function Library({ onNavigate }: LibraryProps) {
       {tab === "today" && (
         <main className="px-4 lg:px-8 py-6 pb-28 lg:pb-8">
           <div className="max-w-lg mx-auto lg:mx-0">
-            <h2 className="text-primary text-xl font-bold mb-1">Today&apos;s Study</h2>
+            <h2 className="text-primary text-xl font-bold mb-1">Today's Study</h2>
             <p className="text-warm-grey text-sm mb-6">Hilchot Foundations of the Torah, Chapters 1–3</p>
             <div className="space-y-3">
               {[
