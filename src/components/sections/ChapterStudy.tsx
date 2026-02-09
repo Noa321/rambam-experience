@@ -27,6 +27,7 @@ export default function ChapterStudy({
   bookColor = "#2C3E50",
 }: ChapterStudyProps) {
   const [activeTab, setActiveTab] = useState("Source");
+  const [langMode, setLangMode] = useState<"both" | "hebrew" | "english">("both");
   const [halachot, setHalachot] = useState<Halacha[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,27 +148,53 @@ export default function ChapterStudy({
           </p>
         </nav>
 
-        {/* Content tabs */}
-        <div className="flex gap-2 px-4 lg:px-8 pb-3 overflow-x-auto hide-scrollbar">
-          {tabs.map((t) => (
-            <button
-              key={t}
-              onClick={() => setActiveTab(t)}
-              className={`flex h-9 shrink-0 items-center justify-center rounded-full px-5 transition-all ${
-                activeTab === t
-                  ? "bg-primary shadow-sm"
-                  : "bg-surface-grey"
-              }`}
-            >
-              <span
-                className={`text-sm ${
-                  activeTab === t ? "text-white font-semibold" : "text-light-grey font-medium"
+        {/* Content tabs + language toggle */}
+        <div className="flex items-center justify-between px-4 lg:px-8 pb-3">
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+            {tabs.map((t) => (
+              <button
+                key={t}
+                onClick={() => setActiveTab(t)}
+                className={`flex h-9 shrink-0 items-center justify-center rounded-full px-5 transition-all ${
+                  activeTab === t
+                    ? "bg-primary shadow-sm"
+                    : "bg-surface-grey"
                 }`}
               >
-                {t}
-              </span>
-            </button>
-          ))}
+                <span
+                  className={`text-sm ${
+                    activeTab === t ? "text-white font-semibold" : "text-light-grey font-medium"
+                  }`}
+                >
+                  {t}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Language toggle */}
+          {activeTab === "Source" && (
+            <div className="flex shrink-0 ml-3 rounded-full bg-surface-grey p-0.5">
+              {([
+                { id: "hebrew", label: "עב" },
+                { id: "both", label: "Both" },
+                { id: "english", label: "EN" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setLangMode(opt.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    langMode === opt.id
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-light-grey hover:text-primary"
+                  }`}
+                  style={opt.id === "hebrew" ? { fontFamily: "var(--font-hebrew)" } : undefined}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
@@ -184,7 +211,7 @@ export default function ChapterStudy({
         {error && !loading && (
           <div className="max-w-md mx-auto px-4 py-20 text-center">
             <Icon name="error_outline" className="text-4xl text-accent-red mb-3" />
-            <p className="text-primary font-semibold mb-2">Couldn't load text</p>
+            <p className="text-primary font-semibold mb-2">Couldn&apos;t load text</p>
             <p className="text-warm-grey text-sm mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
@@ -215,9 +242,27 @@ export default function ChapterStudy({
                   </button>
                 </div>
 
-                {/* Mobile: stacked. Desktop: side by side */}
-                <div className="flex flex-col lg:flex-row lg:gap-8">
-                  <div className="lg:flex-1 text-right mb-5 lg:mb-0" dir="rtl">
+                {/* Text content — adapts to language mode */}
+                {langMode === "both" && (
+                  <div className="flex flex-col lg:flex-row lg:gap-8">
+                    <div className="lg:flex-1 text-right mb-5 lg:mb-0" dir="rtl">
+                      <p
+                        className="text-2xl lg:text-[22px] leading-relaxed text-primary"
+                        style={{ fontFamily: "var(--font-hebrew)" }}
+                      >
+                        {h.hebrew}
+                      </p>
+                    </div>
+                    <div className="hidden lg:block w-px self-stretch" style={{ background: `${bookColor}30` }} />
+                    <div className="lg:hidden h-0.5 w-12 mb-5" style={{ background: `${bookColor}40` }} />
+                    <div className="lg:flex-1 text-left">
+                      <p className="text-base leading-relaxed text-primary/70">{h.english}</p>
+                    </div>
+                  </div>
+                )}
+
+                {langMode === "hebrew" && (
+                  <div className="text-right" dir="rtl">
                     <p
                       className="text-2xl lg:text-[22px] leading-relaxed text-primary"
                       style={{ fontFamily: "var(--font-hebrew)" }}
@@ -225,12 +270,13 @@ export default function ChapterStudy({
                       {h.hebrew}
                     </p>
                   </div>
-                  <div className="hidden lg:block w-px self-stretch" style={{ background: `${bookColor}30` }} />
-                  <div className="lg:hidden h-0.5 w-12 mb-5" style={{ background: `${bookColor}40` }} />
-                  <div className="lg:flex-1 text-left">
-                    <p className="text-base leading-relaxed text-primary/70">{h.english}</p>
+                )}
+
+                {langMode === "english" && (
+                  <div className="text-left">
+                    <p className="text-base lg:text-lg leading-relaxed text-primary/80">{h.english}</p>
                   </div>
-                </div>
+                )}
               </article>
             ))}
 
@@ -273,7 +319,7 @@ export default function ChapterStudy({
             <h3 className="text-primary text-lg font-bold mb-2">Daily Insights</h3>
             <p className="text-warm-grey text-sm max-w-sm mx-auto">
               AI-generated infographics, podcast episodes, and deep-dive insights
-              for each day's study will appear here.
+              for each day&apos;s study will appear here.
             </p>
           </div>
         )}
