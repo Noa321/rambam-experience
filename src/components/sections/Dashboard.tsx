@@ -9,16 +9,6 @@ interface DashboardProps {
   onNavigate: (section: string, data?: Record<string, unknown>) => void;
 }
 
-/* Accent colors for the 14 book-spine bars in the hero graphic */
-const SPINE_HEIGHTS = [52, 68, 84, 60, 96, 76, 88, 64, 100, 58, 80, 72, 56, 92];
-const SPINE_COLORS = [
-  "rgba(192,57,43,0.5)", "rgba(255,255,255,0.2)", "rgba(142,68,173,0.4)",
-  "rgba(255,255,255,0.15)", "rgba(192,57,43,0.35)", "rgba(255,255,255,0.25)",
-  "rgba(41,128,185,0.4)", "rgba(255,255,255,0.18)", "rgba(192,57,43,0.45)",
-  "rgba(255,255,255,0.12)", "rgba(39,174,96,0.35)", "rgba(255,255,255,0.2)",
-  "rgba(192,57,43,0.3)", "rgba(255,255,255,0.22)",
-];
-
 /* Pill definitions for the quick-action row */
 const PILLS = [
   { id: "insights", icon: "auto_awesome", label: "Daily Insights", color: "#D4A574" },
@@ -78,71 +68,20 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
             {/* ─── HERO INFOGRAPHIC + STUDY CARD ─── */}
             <div className="p-4 lg:p-0">
-              {/* Dark graphic area */}
+              {/* Infographic hero image */}
               <div
-                className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a2a3a] via-primary to-[#34495e]"
+                className="relative rounded-2xl overflow-hidden bg-primary"
                 style={{ minHeight: "280px" }}
               >
-                {/* Hebrew watermark */}
-                <div
-                  className="absolute top-4 right-5 text-[80px] leading-none text-white/[0.04] pointer-events-none select-none"
-                  style={{ fontFamily: "var(--font-hebrew)" }}
-                >
-                  {firstChapter?.treatise.heName || "תורה"}
-                </div>
-
-                {/* Subtle geometric connection lines */}
-                <svg className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none">
-                  <line x1="8%" y1="22%" x2="38%" y2="38%" stroke="white" strokeWidth="1" />
-                  <line x1="38%" y1="38%" x2="65%" y2="28%" stroke="white" strokeWidth="1" />
-                  <line x1="65%" y1="28%" x2="92%" y2="42%" stroke="white" strokeWidth="1" />
-                  <circle cx="8%" cy="22%" r="3" fill="rgba(255,255,255,0.3)" />
-                  <circle cx="38%" cy="38%" r="4" fill="rgba(255,255,255,0.2)" />
-                  <circle cx="65%" cy="28%" r="3" fill="rgba(255,255,255,0.3)" />
-                  <circle cx="92%" cy="42%" r="3" fill="rgba(255,255,255,0.2)" />
-                </svg>
-
-                {/* CURRENT STUDY badge */}
-                <div className="absolute top-5 left-5">
-                  <span className="inline-flex items-center gap-2 bg-accent-red text-white px-3.5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-[0.15em] shadow-lg shadow-accent-red/30">
-                    <span className="size-1.5 rounded-full bg-white animate-pulse" />
-                    Current Study
-                  </span>
-                </div>
-
-                {/* Cycle progress ring */}
-                <div className="absolute top-5 right-5 flex flex-col items-center">
-                  <div className="relative size-14">
-                    <svg className="size-14 -rotate-90" viewBox="0 0 56 56">
-                      <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
-                      <circle
-                        cx="28" cy="28" r="24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="3"
-                        strokeDasharray={`${(study.cycleProgress / 100) * 151} 151`}
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-white text-[10px] font-bold">{study.cycleProgress}%</span>
-                    </div>
-                  </div>
-                  <p className="text-white/40 text-[8px] font-bold mt-1 uppercase tracking-wider">
-                    Cycle {study.cycleNumber}
-                  </p>
-                </div>
-
-                {/* Decorative book-spine bars along bottom */}
-                <div className="absolute bottom-0 left-0 right-0 flex items-end justify-center gap-[3px] px-6 opacity-20 pointer-events-none">
-                  {SPINE_HEIGHTS.map((h, i) => (
-                    <div
-                      key={i}
-                      className="rounded-t-sm"
-                      style={{ width: 14, height: h, background: SPINE_COLORS[i] }}
-                    />
-                  ))}
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero-infographic.jpeg"
+                  alt={`Daily Rambam infographic — ${studyLabel}`}
+                  className="w-full h-auto object-cover"
+                />
 
                 {/* Bottom spacer so the card overlaps neatly */}
-                <div className="h-24" />
+                <div className="h-8" />
               </div>
 
               {/* White study card — overlaps hero bottom */}
@@ -243,9 +182,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                     <div>
                       <p className="text-primary text-sm font-bold mb-1">Key Concept</p>
                       <p className="text-slate-grey text-sm leading-relaxed">
-                        Today's study explores foundational principles. Each halacha builds
+                        Today&apos;s study explores foundational principles. Each halacha builds
                         upon the previous, creating a systematic framework for understanding the
-                        Rambam's legal methodology.
+                        Rambam&apos;s legal methodology.
                       </p>
                     </div>
                   </div>
@@ -256,7 +195,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                       <p className="text-primary text-sm font-bold mb-1">Connections</p>
                       <p className="text-slate-grey text-sm leading-relaxed">
                         Related to concepts in Sefer HaMitzvot and echoed in the Shulchan Aruch.
-                        The Rambam's unique approach here differs from other Rishonim.
+                        The Rambam&apos;s unique approach here differs from other Rishonim.
                       </p>
                     </div>
                   </div>
@@ -332,7 +271,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             {/* ─── TODAY'S CHAPTERS ─── */}
             <div className="px-4 lg:px-0">
               <p className="text-warm-grey text-[10px] font-bold uppercase tracking-widest mb-2">
-                Today's Chapters
+                Today&apos;s Chapters
               </p>
               <div className="space-y-2">
                 {study.chapters.map((ch) => (
