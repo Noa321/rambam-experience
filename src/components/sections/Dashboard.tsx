@@ -75,7 +75,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/hero-infographic.jpeg"
+                  src="/rambam_infographic.jpeg"
                   alt={`Daily Rambam infographic — ${studyLabel}`}
                   className="w-full h-auto object-cover"
                 />
