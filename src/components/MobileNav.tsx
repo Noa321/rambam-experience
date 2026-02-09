@@ -4,7 +4,7 @@ import Icon from "./Icon";
 
 interface MobileNavProps {
   currentSection: string;
-  onNavigate: (section: string) => void;
+  onNavigate: (section: string, data?: Record<string, unknown>) => void;
 }
 
 const navItems = [

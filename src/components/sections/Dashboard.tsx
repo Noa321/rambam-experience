@@ -4,7 +4,7 @@ import Icon from "../Icon";
 import { quests } from "@/data/sample";
 
 interface DashboardProps {
-  onNavigate: (section: string) => void;
+  onNavigate: (section: string, data?: Record<string, unknown>) => void;
 }
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
@@ -36,7 +36,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           <div className="lg:flex-1">
             <div className="p-4 lg:p-0">
               <div
-                onClick={() => onNavigate("chapter")}
+                onClick={() => onNavigate("chapter", { treatiseId: "foundations", chapter: 1 })}
                 className="cursor-pointer flex flex-col rounded-xl overflow-hidden bg-slate-bg border border-gray-100 hover:shadow-md transition-shadow"
               >
                 <div className="relative w-full aspect-[16/9] lg:aspect-[2.5/1] bg-gradient-to-br from-primary via-primary/90 to-primary/70">
@@ -51,10 +51,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-warm-grey text-xs font-semibold uppercase tracking-wider">
-                        Hilchot Shabbat
+                        Hilchot Yesodei HaTorah
                       </p>
                       <h2 className="text-primary text-xl font-bold leading-tight mt-1">
-                        Chapter 4: Sabbath Laws
+                        Ch. 1: Foundations of the Torah
                       </h2>
                     </div>
                     <div className="flex flex-col items-end">

@@ -1,24 +1,97 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "../Icon";
-import { sampleHalachot } from "@/data/sample";
+import { fetchChapter, parseHalachot, type SefariaText } from "@/lib/sefaria";
+import type { Treatise } from "@/data/books";
 
 interface ChapterStudyProps {
-  onNavigate: (section: string) => void;
+  onNavigate: (section: string, data?: Record<string, unknown>) => void;
+  treatise?: Treatise;
+  chapter?: number;
+  bookColor?: string;
 }
 
 const tabs = ["Source", "Summary", "Commentary", "Insights"];
 
-export default function ChapterStudy({ onNavigate }: ChapterStudyProps) {
+interface Halacha {
+  number: number;
+  hebrew: string;
+  english: string;
+}
+
+export default function ChapterStudy({
+  onNavigate,
+  treatise,
+  chapter = 1,
+  bookColor = "#2C3E50",
+}: ChapterStudyProps) {
   const [activeTab, setActiveTab] = useState("Source");
+  const [halachot, setHalachot] = useState<Halacha[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sefariaData, setSefariaData] = useState<SefariaText | null>(null);
+
+  // Default to Foundations of the Torah if no treatise passed
+  const currentRef = treatise?.sefariaRef || "Mishneh Torah, Foundations of the Torah";
+  const currentName = treatise?.name || "Foundations of the Torah";
+  const currentHeName = treatise?.heName || "יסודי התורה";
+  const totalChapters = treatise?.chapters || 10;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadText() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await fetchChapter(currentRef, chapter);
+        if (cancelled) return;
+
+        setSefariaData(data);
+        setHalachot(parseHalachot(data));
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Failed to load text");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadText();
+    return () => { cancelled = true; };
+  }, [currentRef, chapter]);
+
+  const progress = Math.round((chapter / totalChapters) * 100);
+
+  const handleNextChapter = () => {
+    if (chapter < totalChapters) {
+      onNavigate("chapter", {
+        treatiseId: treatise?.id,
+        chapter: chapter + 1,
+      });
+    }
+  };
+
+  const handlePrevChapter = () => {
+    if (chapter > 1) {
+      onNavigate("chapter", {
+        treatiseId: treatise?.id,
+        chapter: chapter - 1,
+      });
+    }
+  };
 
   return (
     <section className="animate-fade-in">
       <header className="sticky top-0 z-40 bg-white/95 ios-blur border-b border-gray-100">
         {/* Progress bar */}
         <div className="h-1 w-full bg-gray-100">
-          <div className="h-full bg-muted-red w-1/3" />
+          <div
+            className="h-full transition-all duration-500"
+            style={{ width: `${progress}%`, background: bookColor }}
+          />
         </div>
 
         <div className="flex items-center px-4 lg:px-8 pt-4 pb-2 justify-between">
@@ -34,21 +107,43 @@ export default function ChapterStudy({ onNavigate }: ChapterStudyProps) {
             onClick={() => onNavigate("library")}
             className="hidden lg:flex items-center gap-1 text-primary cursor-pointer text-sm font-medium hover:text-deep-red transition-colors"
           >
-            <Icon name="arrow_back_ios" className="text-lg" /> Hilchot Shabbat
+            <Icon name="arrow_back_ios" className="text-lg" /> {currentName}
           </button>
 
           <div className="flex-1 text-center lg:text-left lg:flex-none lg:ml-4">
-            <h2 className="text-lg font-bold tracking-tight text-primary">Chapter 4</h2>
+            <h2 className="text-lg font-bold tracking-tight text-primary">
+              Chapter {chapter}
+            </h2>
           </div>
 
-          <button className="flex items-center justify-center size-10 rounded-full bg-muted-red/10 text-muted-red">
-            <Icon name="emoji_events" className="text-xl" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Chapter navigation */}
+            <button
+              onClick={handlePrevChapter}
+              disabled={chapter <= 1}
+              className="flex items-center justify-center size-10 rounded-full bg-gray-50 text-primary disabled:opacity-30 cursor-pointer disabled:cursor-default"
+            >
+              <Icon name="chevron_left" className="text-xl" />
+            </button>
+            <span className="text-xs text-warm-grey font-medium min-w-[3rem] text-center">
+              {chapter}/{totalChapters}
+            </span>
+            <button
+              onClick={handleNextChapter}
+              disabled={chapter >= totalChapters}
+              className="flex items-center justify-center size-10 rounded-full bg-gray-50 text-primary disabled:opacity-30 cursor-pointer disabled:cursor-default"
+            >
+              <Icon name="chevron_right" className="text-xl" />
+            </button>
+          </div>
         </div>
 
         <nav className="px-4 lg:px-8 pb-2">
           <p className="text-light-grey text-[10px] font-bold tracking-widest uppercase">
-            Mishneh Torah · Sabbath
+            Mishneh Torah · Hilchot {currentName}
+          </p>
+          <p className="text-warm-grey text-xs mt-0.5" style={{ fontFamily: "var(--font-hebrew)" }}>
+            {sefariaData?.heRef || `משנה תורה, הלכות ${currentHeName} ${chapter}`}
           </p>
         </nav>
 
@@ -77,47 +172,125 @@ export default function ChapterStudy({ onNavigate }: ChapterStudyProps) {
       </header>
 
       <main className="pb-28 lg:pb-8">
-        <div className="max-w-3xl mx-auto px-4 lg:px-8 py-4 lg:py-6 space-y-4">
-          {sampleHalachot.map((h) => (
-            <article
-              key={h.number}
-              className="rounded-xl p-5 lg:p-6 bg-white border border-gray-100 shadow-sm hover:border-primary/20 transition-all"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="size-8 rounded bg-primary/5 flex items-center justify-center text-primary font-bold text-sm">
-                  {h.number}
-                </div>
-                <button className="text-light-grey hover:text-muted-red transition-colors">
-                  <Icon name="bookmark" className="text-xl" />
-                </button>
-              </div>
+        {/* Loading state */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="size-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin" />
+            <p className="text-warm-grey text-sm">Loading from Sefaria...</p>
+          </div>
+        )}
 
-              {/* Mobile: stacked. Desktop: side by side */}
-              <div className="flex flex-col lg:flex-row lg:gap-8">
-                <div className="lg:flex-1 text-right mb-5 lg:mb-0" dir="rtl">
-                  <p
-                    className="text-2xl lg:text-[22px] leading-relaxed text-primary"
-                    style={{ fontFamily: "var(--font-hebrew)" }}
+        {/* Error state */}
+        {error && !loading && (
+          <div className="max-w-md mx-auto px-4 py-20 text-center">
+            <Icon name="error_outline" className="text-4xl text-accent-red mb-3" />
+            <p className="text-primary font-semibold mb-2">Couldn&apos;t load text</p>
+            <p className="text-warm-grey text-sm mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-primary text-white text-sm rounded-lg font-medium"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Source tab — live Sefaria text */}
+        {!loading && !error && activeTab === "Source" && (
+          <div className="max-w-3xl mx-auto px-4 lg:px-8 py-4 lg:py-6 space-y-4">
+            {halachot.map((h) => (
+              <article
+                key={h.number}
+                className="rounded-xl p-5 lg:p-6 bg-white border border-gray-100 shadow-sm hover:border-primary/20 transition-all"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div
+                    className="size-8 rounded flex items-center justify-center text-white font-bold text-sm"
+                    style={{ background: bookColor }}
                   >
-                    {h.hebrew}
-                  </p>
+                    {h.number}
+                  </div>
+                  <button className="text-light-grey hover:text-muted-red transition-colors">
+                    <Icon name="bookmark" className="text-xl" />
+                  </button>
                 </div>
-                <div className="hidden lg:block w-px bg-muted-red/20 self-stretch" />
-                <div className="lg:hidden h-0.5 w-12 bg-muted-red/30 mb-5" />
-                <div className="lg:flex-1 text-left">
-                  <p className="text-base leading-relaxed text-primary/70">{h.english}</p>
+
+                {/* Mobile: stacked. Desktop: side by side */}
+                <div className="flex flex-col lg:flex-row lg:gap-8">
+                  <div className="lg:flex-1 text-right mb-5 lg:mb-0" dir="rtl">
+                    <p
+                      className="text-2xl lg:text-[22px] leading-relaxed text-primary"
+                      style={{ fontFamily: "var(--font-hebrew)" }}
+                    >
+                      {h.hebrew}
+                    </p>
+                  </div>
+                  <div className="hidden lg:block w-px self-stretch" style={{ background: `${bookColor}30` }} />
+                  <div className="lg:hidden h-0.5 w-12 mb-5" style={{ background: `${bookColor}40` }} />
+                  <div className="lg:flex-1 text-left">
+                    <p className="text-base leading-relaxed text-primary/70">{h.english}</p>
+                  </div>
                 </div>
+              </article>
+            ))}
+
+            {halachot.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-warm-grey">No text available for this chapter.</p>
               </div>
-            </article>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
+
+        {/* Summary tab — placeholder for future AI summaries */}
+        {!loading && !error && activeTab === "Summary" && (
+          <div className="max-w-3xl mx-auto px-4 lg:px-8 py-12 text-center">
+            <Icon name="auto_awesome" className="text-4xl text-warm-grey mb-3" />
+            <h3 className="text-primary text-lg font-bold mb-2">AI Summary</h3>
+            <p className="text-warm-grey text-sm max-w-sm mx-auto">
+              AI-generated summaries for each chapter coming soon. This will include key concepts,
+              practical takeaways, and connections to other halachot.
+            </p>
+          </div>
+        )}
+
+        {/* Commentary tab — placeholder */}
+        {!loading && !error && activeTab === "Commentary" && (
+          <div className="max-w-3xl mx-auto px-4 lg:px-8 py-12 text-center">
+            <Icon name="forum" className="text-4xl text-warm-grey mb-3" />
+            <h3 className="text-primary text-lg font-bold mb-2">Commentary</h3>
+            <p className="text-warm-grey text-sm max-w-sm mx-auto">
+              Classic commentaries (Kesef Mishneh, Maggid Mishneh, Raavad) will appear here,
+              also sourced from Sefaria.
+            </p>
+          </div>
+        )}
+
+        {/* Insights tab — placeholder */}
+        {!loading && !error && activeTab === "Insights" && (
+          <div className="max-w-3xl mx-auto px-4 lg:px-8 py-12 text-center">
+            <Icon name="lightbulb" className="text-4xl text-warm-grey mb-3" />
+            <h3 className="text-primary text-lg font-bold mb-2">Daily Insights</h3>
+            <p className="text-warm-grey text-sm max-w-sm mx-auto">
+              AI-generated infographics, podcast episodes, and deep-dive insights
+              for each day&apos;s study will appear here.
+            </p>
+          </div>
+        )}
 
         {/* Next Chapter buttons */}
         <div className="fixed lg:static bottom-0 left-0 right-0 lg:max-w-3xl lg:mx-auto lg:px-8 lg:py-4 p-4 bg-gradient-to-t from-white via-white/95 to-transparent lg:bg-none z-40">
           <div className="flex gap-3">
-            <button className="flex-1 flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-white font-bold shadow-xl shadow-primary/10 active:scale-95 transition-transform">
-              <span className="text-sm tracking-wide">NEXT CHAPTER</span>
-              <Icon name="arrow_forward" />
+            <button
+              onClick={handleNextChapter}
+              disabled={chapter >= totalChapters}
+              className="flex-1 flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-white font-bold shadow-xl shadow-primary/10 active:scale-95 transition-transform disabled:opacity-50"
+            >
+              <span className="text-sm tracking-wide">
+                {chapter >= totalChapters ? "COMPLETED" : "NEXT CHAPTER"}
+              </span>
+              {chapter < totalChapters && <Icon name="arrow_forward" />}
+              {chapter >= totalChapters && <Icon name="check" />}
             </button>
             <button className="flex size-14 items-center justify-center rounded-2xl bg-white border border-gray-200 text-muted-red shadow-sm active:scale-95 transition-transform">
               <Icon name="check_circle" className="text-2xl" />

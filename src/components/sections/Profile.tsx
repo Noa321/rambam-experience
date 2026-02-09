@@ -3,7 +3,7 @@
 import Icon from "../Icon";
 
 interface ProfileProps {
-  onNavigate: (section: string) => void;
+  onNavigate: (section: string, data?: Record<string, unknown>) => void;
 }
 
 const achievements = [
