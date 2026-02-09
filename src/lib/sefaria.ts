@@ -102,6 +102,7 @@ export function stripHtml(html: string): string {
 /**
  * Get a clean array of halachot from a chapter response.
  * Each halacha has its number, Hebrew text, and English translation.
+ * HTML is preserved for rendering with dangerouslySetInnerHTML.
  */
 export function parseHalachot(data: SefariaText) {
   const count = Math.max(data.he.length, data.text.length);
@@ -110,8 +111,8 @@ export function parseHalachot(data: SefariaText) {
   for (let i = 0; i < count; i++) {
     halachot.push({
       number: i + 1,
-      hebrew: data.he[i] ? stripHtml(data.he[i]) : "",
-      english: data.text[i] ? stripHtml(data.text[i]) : "",
+      hebrew: data.he[i] || "",
+      english: data.text[i] || "",
     });
   }
 

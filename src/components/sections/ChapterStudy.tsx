@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Icon from "../Icon";
 import { fetchChapter, parseHalachot, type SefariaText } from "@/lib/sefaria";
 import type { Treatise } from "@/data/books";
+import { getInsightForChapter, type InsightArticle } from "@/data/insights";
 
 interface ChapterStudyProps {
   onNavigate: (section: string, data?: Record<string, unknown>) => void;
@@ -224,7 +225,7 @@ export default function ChapterStudy({
 
         {/* Source tab — live Sefaria text */}
         {!loading && !error && activeTab === "Source" && (
-          <div className="max-w-3xl mx-auto px-4 lg:px-8 py-4 lg:py-6 space-y-4">
+          <div className="max-w-3xl mx-auto px-4 lg:px-8 py-4 lg:py-6 space-y-6">
             {halachot.map((h) => (
               <article
                 key={h.number}
@@ -246,35 +247,39 @@ export default function ChapterStudy({
                 {langMode === "both" && (
                   <div className="flex flex-col lg:flex-row lg:gap-8">
                     <div className="lg:flex-1 text-right mb-5 lg:mb-0" dir="rtl">
-                      <p
-                        className="text-2xl lg:text-[22px] leading-relaxed text-primary"
+                      <div
+                        className="text-xl lg:text-[22px] leading-loose text-primary halacha-text"
                         style={{ fontFamily: "var(--font-hebrew)" }}
-                      >
-                        {h.hebrew}
-                      </p>
+                        dangerouslySetInnerHTML={{ __html: h.hebrew }}
+                      />
                     </div>
                     <div className="hidden lg:block w-px self-stretch" style={{ background: `${bookColor}30` }} />
                     <div className="lg:hidden h-0.5 w-12 mb-5" style={{ background: `${bookColor}40` }} />
                     <div className="lg:flex-1 text-left">
-                      <p className="text-base leading-relaxed text-primary/70">{h.english}</p>
+                      <div
+                        className="text-base leading-loose text-slate-grey halacha-text"
+                        dangerouslySetInnerHTML={{ __html: h.english }}
+                      />
                     </div>
                   </div>
                 )}
 
                 {langMode === "hebrew" && (
                   <div className="text-right" dir="rtl">
-                    <p
-                      className="text-2xl lg:text-[22px] leading-relaxed text-primary"
+                    <div
+                      className="text-2xl lg:text-[22px] leading-loose text-primary halacha-text"
                       style={{ fontFamily: "var(--font-hebrew)" }}
-                    >
-                      {h.hebrew}
-                    </p>
+                      dangerouslySetInnerHTML={{ __html: h.hebrew }}
+                    />
                   </div>
                 )}
 
                 {langMode === "english" && (
                   <div className="text-left">
-                    <p className="text-base lg:text-lg leading-relaxed text-primary/80">{h.english}</p>
+                    <div
+                      className="text-base lg:text-lg leading-loose text-primary/90 halacha-text"
+                      dangerouslySetInnerHTML={{ __html: h.english }}
+                    />
                   </div>
                 )}
               </article>
@@ -312,17 +317,60 @@ export default function ChapterStudy({
           </div>
         )}
 
-        {/* Insights tab — placeholder */}
-        {!loading && !error && activeTab === "Insights" && (
-          <div className="max-w-3xl mx-auto px-4 lg:px-8 py-12 text-center">
-            <Icon name="lightbulb" className="text-4xl text-warm-grey mb-3" />
-            <h3 className="text-primary text-lg font-bold mb-2">Daily Insights</h3>
-            <p className="text-warm-grey text-sm max-w-sm mx-auto">
-              AI-generated infographics, podcast episodes, and deep-dive insights
-              for each day&apos;s study will appear here.
-            </p>
-          </div>
-        )}
+        {/* Insights tab — daily article */}
+        {!loading && !error && activeTab === "Insights" && (() => {
+          const insight = treatise ? getInsightForChapter(treatise.id, chapter) : null;
+
+          if (!insight) {
+            return (
+              <div className="max-w-3xl mx-auto px-4 lg:px-8 py-12 text-center">
+                <Icon name="lightbulb" className="text-4xl text-warm-grey mb-3" />
+                <h3 className="text-primary text-lg font-bold mb-2">Daily Insights</h3>
+                <p className="text-warm-grey text-sm max-w-sm mx-auto">
+                  No insight article is available for this chapter yet.
+                  Check back soon!
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="max-w-3xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
+              {/* Article header */}
+              <header className="mb-8">
+                <p className="text-xs font-bold tracking-widest uppercase text-muted-red mb-2">
+                  {insight.subtitle}
+                </p>
+                <h2 className="text-2xl lg:text-3xl font-bold text-primary leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
+                  {insight.title}
+                </h2>
+              </header>
+
+              {/* Article sections */}
+              <div className="space-y-10">
+                {insight.sections.map((section, idx) => (
+                  <section key={idx} className="insight-section">
+                    {section.label && (
+                      <span
+                        className="inline-block text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
+                        style={{ background: `${bookColor}12`, color: bookColor }}
+                      >
+                        {section.label}
+                      </span>
+                    )}
+                    <h3 className="text-xl lg:text-2xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-serif)" }}>
+                      {section.heading}
+                    </h3>
+                    <div
+                      className="insight-article text-base leading-relaxed text-slate-grey"
+                      dangerouslySetInnerHTML={{ __html: section.content }}
+                    />
+                  </section>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Next Chapter buttons */}
         <div className="fixed lg:static bottom-0 left-0 right-0 lg:max-w-3xl lg:mx-auto lg:px-8 lg:py-4 p-4 bg-gradient-to-t from-white via-white/95 to-transparent lg:bg-none z-40">

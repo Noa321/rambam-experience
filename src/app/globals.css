@@ -59,3 +59,58 @@ h1, h2, h3, h4, .hero-serif {
 .animate-fade-in {
   animation: fadeIn 0.2s ease-out;
 }
+
+/* Halacha text: preserve paragraph spacing from Sefaria HTML */
+.halacha-text b,
+.halacha-text strong {
+  font-weight: 700;
+}
+.halacha-text i,
+.halacha-text em {
+  font-style: italic;
+}
+
+/* Insight article prose styles */
+.insight-article p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.insight-article h3 {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2C3E50;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.insight-article strong {
+  font-weight: 700;
+  color: #2C3E50;
+}
+
+.insight-article em {
+  font-style: italic;
+}
+
+.insight-article blockquote {
+  border-left: 3px solid #B24C4C;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  background: #FAF8F5;
+  border-radius: 0 0.75rem 0.75rem 0;
+  color: #2C3E50;
+  font-family: var(--font-serif);
+  font-style: italic;
+  line-height: 1.8;
+}
+
+.insight-article blockquote cite {
+  display: block;
+  margin-top: 0.5rem;
+  font-style: normal;
+  font-size: 0.85rem;
+  color: #718096;
+  font-family: var(--font-sans);
+}
