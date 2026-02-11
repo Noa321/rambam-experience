@@ -5,6 +5,7 @@ import Icon from "../Icon";
 import { fetchChapter, parseHalachot, type SefariaText } from "@/lib/sefaria";
 import type { Treatise } from "@/data/books";
 import { getInsightForChapter, type InsightArticle } from "@/data/insights";
+import { fetchInsightsForTreatise } from "@/lib/content";
 
 interface ChapterStudyProps {
   onNavigate: (section: string, data?: Record<string, unknown>) => void;
@@ -33,6 +34,8 @@ export default function ChapterStudy({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sefariaData, setSefariaData] = useState<SefariaText | null>(null);
+  const [supabaseInsights, setSupabaseInsights] = useState<InsightArticle[]>([]);
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   // Default to Foundations of the Torah if no treatise passed
   const currentRef = treatise?.sefariaRef || "Mishneh Torah, Foundations of the Torah";
@@ -64,6 +67,27 @@ export default function ChapterStudy({
     loadText();
     return () => { cancelled = true; };
   }, [currentRef, chapter]);
+
+  // Fetch published insights from Supabase for this treatise
+  useEffect(() => {
+    if (!treatise) return;
+    let cancelled = false;
+
+    async function loadInsights() {
+      setInsightsLoading(true);
+      try {
+        const insights = await fetchInsightsForTreatise(treatise!.name);
+        if (!cancelled) setSupabaseInsights(insights);
+      } catch {
+        // Silently fail — static insights still available
+      } finally {
+        if (!cancelled) setInsightsLoading(false);
+      }
+    }
+
+    loadInsights();
+    return () => { cancelled = true; };
+  }, [treatise]);
 
   const progress = Math.round((chapter / totalChapters) * 100);
 
@@ -317,11 +341,24 @@ export default function ChapterStudy({
           </div>
         )}
 
-        {/* Insights tab — daily article */}
+        {/* Insights tab — static + Supabase articles */}
         {!loading && !error && activeTab === "Insights" && (() => {
-          const insight = treatise ? getInsightForChapter(treatise.id, chapter) : null;
+          const staticInsight = treatise ? getInsightForChapter(treatise.id, chapter) : null;
+          const allInsights = [
+            ...(supabaseInsights || []),
+            ...(staticInsight ? [staticInsight] : []),
+          ];
 
-          if (!insight) {
+          if (insightsLoading) {
+            return (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <div className="size-10 border-3 border-gray-200 border-t-primary rounded-full animate-spin" />
+                <p className="text-warm-grey text-sm">Loading insights...</p>
+              </div>
+            );
+          }
+
+          if (allInsights.length === 0) {
             return (
               <div className="max-w-3xl mx-auto px-4 lg:px-8 py-12 text-center">
                 <Icon name="lightbulb" className="text-4xl text-warm-grey mb-3" />
@@ -335,39 +372,52 @@ export default function ChapterStudy({
           }
 
           return (
-            <div className="max-w-3xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
-              {/* Article header */}
-              <header className="mb-8">
-                <p className="text-xs font-bold tracking-widest uppercase text-muted-red mb-2">
-                  {insight.subtitle}
-                </p>
-                <h2 className="text-2xl lg:text-3xl font-bold text-primary leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
-                  {insight.title}
-                </h2>
-              </header>
+            <div className="max-w-3xl mx-auto px-4 lg:px-8 py-6 lg:py-8 space-y-16">
+              {allInsights.map((insight, insightIdx) => (
+                <div key={insightIdx}>
+                  {/* Article header */}
+                  <header className="mb-8">
+                    <p className="text-xs font-bold tracking-widest uppercase text-muted-red mb-2">
+                      {insight.subtitle}
+                    </p>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-primary leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
+                      {insight.title}
+                    </h2>
+                  </header>
 
-              {/* Article sections */}
-              <div className="space-y-10">
-                {insight.sections.map((section, idx) => (
-                  <section key={idx} className="insight-section">
-                    {section.label && (
-                      <span
-                        className="inline-block text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
-                        style={{ background: `${bookColor}12`, color: bookColor }}
-                      >
-                        {section.label}
-                      </span>
-                    )}
-                    <h3 className="text-xl lg:text-2xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-serif)" }}>
-                      {section.heading}
-                    </h3>
-                    <div
-                      className="insight-article text-base leading-relaxed text-slate-grey"
-                      dangerouslySetInnerHTML={{ __html: section.content }}
-                    />
-                  </section>
-                ))}
-              </div>
+                  {/* Article sections */}
+                  <div className="space-y-10">
+                    {insight.sections.map((section, idx) => (
+                      <section key={idx} className="insight-section">
+                        {section.label && (
+                          <span
+                            className="inline-block text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-3"
+                            style={{ background: `${bookColor}12`, color: bookColor }}
+                          >
+                            {section.label}
+                          </span>
+                        )}
+                        <h3 className="text-xl lg:text-2xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-serif)" }}>
+                          {section.heading}
+                        </h3>
+                        <div
+                          className="insight-article text-base leading-relaxed text-slate-grey"
+                          dangerouslySetInnerHTML={{ __html: section.content }}
+                        />
+                      </section>
+                    ))}
+                  </div>
+
+                  {/* Separator between multiple insights */}
+                  {insightIdx < allInsights.length - 1 && (
+                    <div className="mt-12 flex items-center gap-4">
+                      <div className="flex-1 h-px bg-gray-200" />
+                      <Icon name="auto_awesome" className="text-warm-grey text-sm" />
+                      <div className="flex-1 h-px bg-gray-200" />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           );
         })()}

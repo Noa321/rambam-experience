@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Icon from "../Icon";
 import { getDailyStudy, getDailyStudyLabel, getTotalChapters } from "@/lib/daily-study";
 import { quests } from "@/data/sample";
+import { fetchLatestContent, type ContentRow } from "@/lib/content";
 
 interface DashboardProps {
   onNavigate: (section: string, data?: Record<string, unknown>) => void;
@@ -28,6 +29,12 @@ const COMMUNITY = [
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
   const [activePanel, setActivePanel] = useState<string | null>(null);
+  const [latestContent, setLatestContent] = useState<ContentRow | null>(null);
+
+  /* Fetch latest published content from Supabase */
+  useEffect(() => {
+    fetchLatestContent().then(setLatestContent).catch(() => {});
+  }, []);
 
   /* Daily study calculation */
   const study = useMemo(() => getDailyStudy(), []);
@@ -177,42 +184,97 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             {activePanel === "insights" && (
               <div className="px-4 lg:px-0 animate-fade-in">
                 <div className="p-5 bg-white border border-gray-100 rounded-2xl ios-shadow space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Icon name="lightbulb" className="text-amber-500 text-xl shrink-0 mt-0.5" filled />
-                    <div>
-                      <p className="text-primary text-sm font-bold mb-1">Key Concept</p>
-                      <p className="text-slate-grey text-sm leading-relaxed">
-                        Today&apos;s study explores foundational principles. Each halacha builds
-                        upon the previous, creating a systematic framework for understanding the
-                        Rambam&apos;s legal methodology.
+                  {latestContent ? (
+                    <>
+                      <div className="flex items-start gap-3">
+                        <Icon name="auto_awesome" className="text-amber-500 text-xl shrink-0 mt-0.5" filled />
+                        <div>
+                          <p className="text-primary text-sm font-bold mb-1">{latestContent.title}</p>
+                          {latestContent.rambam_chapters && (
+                            <p className="text-muted-red text-[10px] font-bold uppercase tracking-widest mb-2">
+                              {latestContent.rambam_chapters}
+                            </p>
+                          )}
+                          {latestContent.hook && (
+                            <p className="text-slate-grey text-sm leading-relaxed">
+                              {latestContent.hook}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {latestContent.summary && (
+                        <>
+                          <div className="h-px bg-gray-100" />
+                          <div className="flex items-start gap-3">
+                            <Icon name="lightbulb" className="text-primary text-xl shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-primary text-sm font-bold mb-1">Summary</p>
+                              <p className="text-slate-grey text-sm leading-relaxed">
+                                {latestContent.summary}
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      <div className="h-px bg-gray-100" />
+                      <button
+                        onClick={() => {
+                          if (firstChapter) {
+                            onNavigate("chapter", {
+                              treatiseId: firstChapter.treatise.id,
+                              chapter: firstChapter.chapter,
+                            });
+                          }
+                        }}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/5 text-primary text-sm font-semibold hover:bg-primary/10 transition-colors cursor-pointer"
+                      >
+                        <Icon name="menu_book" className="text-base" />
+                        Read Full Insight
+                      </button>
+                      <p className="text-[10px] text-warm-grey text-center uppercase tracking-widest pt-1">
+                        Published content · From Content Hub
                       </p>
-                    </div>
-                  </div>
-                  <div className="h-px bg-gray-100" />
-                  <div className="flex items-start gap-3">
-                    <Icon name="link" className="text-primary text-xl shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-primary text-sm font-bold mb-1">Connections</p>
-                      <p className="text-slate-grey text-sm leading-relaxed">
-                        Related to concepts in Sefer HaMitzvot and echoed in the Shulchan Aruch.
-                        The Rambam&apos;s unique approach here differs from other Rishonim.
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-3">
+                        <Icon name="lightbulb" className="text-amber-500 text-xl shrink-0 mt-0.5" filled />
+                        <div>
+                          <p className="text-primary text-sm font-bold mb-1">Key Concept</p>
+                          <p className="text-slate-grey text-sm leading-relaxed">
+                            Today&apos;s study explores foundational principles. Each halacha builds
+                            upon the previous, creating a systematic framework for understanding the
+                            Rambam&apos;s legal methodology.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="h-px bg-gray-100" />
+                      <div className="flex items-start gap-3">
+                        <Icon name="link" className="text-primary text-xl shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-primary text-sm font-bold mb-1">Connections</p>
+                          <p className="text-slate-grey text-sm leading-relaxed">
+                            Related to concepts in Sefer HaMitzvot and echoed in the Shulchan Aruch.
+                            The Rambam&apos;s unique approach here differs from other Rishonim.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="h-px bg-gray-100" />
+                      <div className="flex items-start gap-3">
+                        <Icon name="psychology" className="text-deep-red text-xl shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-primary text-sm font-bold mb-1">Practical Takeaway</p>
+                          <p className="text-slate-grey text-sm leading-relaxed">
+                            Understanding these principles has direct application to daily observance
+                            and provides the philosophical underpinning for many mitzvot.
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-warm-grey text-center uppercase tracking-widest pt-1">
+                        AI-generated · Updated daily
                       </p>
-                    </div>
-                  </div>
-                  <div className="h-px bg-gray-100" />
-                  <div className="flex items-start gap-3">
-                    <Icon name="psychology" className="text-deep-red text-xl shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-primary text-sm font-bold mb-1">Practical Takeaway</p>
-                      <p className="text-slate-grey text-sm leading-relaxed">
-                        Understanding these principles has direct application to daily observance
-                        and provides the philosophical underpinning for many mitzvot.
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-warm-grey text-center uppercase tracking-widest pt-1">
-                    AI-generated · Updated daily
-                  </p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
