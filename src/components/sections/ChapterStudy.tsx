@@ -12,6 +12,7 @@ interface ChapterStudyProps {
   treatise?: Treatise;
   chapter?: number;
   bookColor?: string;
+  initialTab?: string;
 }
 
 const tabs = ["Source", "Summary", "Commentary", "Insights"];
@@ -27,8 +28,9 @@ export default function ChapterStudy({
   treatise,
   chapter = 1,
   bookColor = "#2C3E50",
+  initialTab,
 }: ChapterStudyProps) {
-  const [activeTab, setActiveTab] = useState("Source");
+  const [activeTab, setActiveTab] = useState(initialTab || "Source");
   const [langMode, setLangMode] = useState<"both" | "hebrew" | "english">("both");
   const [halachot, setHalachot] = useState<Halacha[]>([]);
   const [loading, setLoading] = useState(true);

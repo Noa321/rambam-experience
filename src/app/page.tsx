@@ -20,6 +20,7 @@ export default function Home() {
   // Track which treatise and chapter the user is studying
   const [currentTreatiseId, setCurrentTreatiseId] = useState<string>("foundations");
   const [currentChapter, setCurrentChapter] = useState<number>(1);
+  const [initialTab, setInitialTab] = useState<string | undefined>(undefined);
 
   const navigateToApp = (sec: Section) => {
     setView("app");
@@ -37,6 +38,9 @@ export default function Home() {
     if (data?.chapter) {
       setCurrentChapter(data.chapter as number);
     }
+
+    // Pass initialTab to ChapterStudy (e.g "Insights" from Read Full Insight)
+    setInitialTab(data?.initialTab as string | undefined);
 
     window.scrollTo(0, 0);
   };
@@ -74,6 +78,7 @@ export default function Home() {
             treatise={treatise}
             chapter={currentChapter}
             bookColor={bookColor}
+            initialTab={initialTab}
           />
         )}
         {section === "profile" && <Profile onNavigate={navigateSection} />}

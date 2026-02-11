@@ -5,6 +5,7 @@ import Icon from "../Icon";
 import { getDailyStudy, getDailyStudyLabel, getTotalChapters } from "@/lib/daily-study";
 import { quests } from "@/data/sample";
 import { fetchLatestContent, type ContentRow } from "@/lib/content";
+import { books } from "@/data/books";
 
 interface DashboardProps {
   onNavigate: (section: string, data?: Record<string, unknown>) => void;
@@ -219,10 +220,24 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                       <div className="h-px bg-gray-100" />
                       <button
                         onClick={() => {
-                          if (firstChapter) {
+                          // Find the treatise matching this content's hilchot
+                          let targetTreatiseId = firstChapter?.treatise.id;
+                          if (latestContent.hilchot) {
+                            for (const book of books) {
+                              const match = book.treatises.find(
+                                (t) => t.name.toLowerCase() === latestContent.hilchot!.toLowerCase()
+                              );
+                              if (match) {
+                                targetTreatiseId = match.id;
+                                break;
+                              }
+                            }
+                          }
+                          if (targetTreatiseId) {
                             onNavigate("chapter", {
-                              treatiseId: firstChapter.treatise.id,
-                              chapter: firstChapter.chapter,
+                              treatiseId: targetTreatiseId,
+                              chapter: 1,
+                              initialTab: "Insights",
                             });
                           }
                         }}
