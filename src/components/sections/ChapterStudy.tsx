@@ -385,6 +385,21 @@ export default function ChapterStudy({
                     <h2 className="text-2xl lg:text-3xl font-bold text-primary leading-tight" style={{ fontFamily: "var(--font-serif)" }}>
                       {insight.title}
                     </h2>
+                    {/* Audio player for insights with media */}
+                    {insight.mediaUrl && (
+                      <div className="mt-4 flex items-center gap-3 p-3 bg-violet-50/60 border border-violet-100 rounded-xl">
+                        <Icon name="headphones" className="text-violet-600 text-xl shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-violet-800 mb-1.5">Listen to this talk</p>
+                          <audio
+                            controls
+                            preload="metadata"
+                            src={insight.mediaUrl}
+                            className="w-full h-8"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </header>
 
                   {/* Article sections */}

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Icon from "../Icon";
 import { getDailyStudy, getDailyStudyLabel, getTotalChapters } from "@/lib/daily-study";
 import { quests } from "@/data/sample";
-import { fetchLatestContent, type ContentRow } from "@/lib/content";
+import { fetchLatestContent, fetchLatestAudio, type ContentRow } from "@/lib/content";
 import { books } from "@/data/books";
 
 interface DashboardProps {
@@ -31,11 +31,45 @@ const COMMUNITY = [
 export default function Dashboard({ onNavigate }: DashboardProps) {
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const [latestContent, setLatestContent] = useState<ContentRow | null>(null);
+  const [latestAudio, setLatestAudio] = useState<ContentRow | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const [audioCurrentTime, setAudioCurrentTime] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   /* Fetch latest published content from Supabase */
   useEffect(() => {
     fetchLatestContent().then(setLatestContent).catch(() => {});
+    fetchLatestAudio().then(setLatestAudio).catch(() => {});
   }, []);
+
+  /* Audio player controls */
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const skipBack = () => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
+  };
+
+  const skipForward = () => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = Math.min(audioDuration, audioRef.current.currentTime + 30);
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   /* Daily study calculation */
   const study = useMemo(() => getDailyStudy(), []);
@@ -298,49 +332,95 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             {activePanel === "podcast" && (
               <div className="px-4 lg:px-0 animate-fade-in">
                 <div className="p-5 bg-white border border-gray-100 rounded-2xl ios-shadow">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="size-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-200/50">
-                      <Icon name="play_arrow" className="text-white text-2xl" filled />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-primary text-sm font-bold">{studyLabel}</p>
-                      <p className="text-warm-grey text-xs mt-0.5">
-                        Episode {study.dayOfCycle} · 8 min
-                      </p>
-                    </div>
-                  </div>
+                  {latestAudio?.media_url ? (
+                    <>
+                      {/* Hidden audio element */}
+                      <audio
+                        ref={audioRef}
+                        src={latestAudio.media_url}
+                        preload="metadata"
+                        onTimeUpdate={() => {
+                          if (audioRef.current) {
+                            setAudioCurrentTime(audioRef.current.currentTime);
+                            setAudioProgress(
+                              audioDuration > 0
+                                ? (audioRef.current.currentTime / audioDuration) * 100
+                                : 0
+                            );
+                          }
+                        }}
+                        onLoadedMetadata={() => {
+                          if (audioRef.current) {
+                            setAudioDuration(audioRef.current.duration);
+                          }
+                        }}
+                        onEnded={() => {
+                          setIsPlaying(false);
+                          setAudioProgress(0);
+                          setAudioCurrentTime(0);
+                        }}
+                      />
 
-                  {/* Waveform visualizer */}
-                  <div className="relative mb-3">
-                    <div className="flex items-center gap-0.5 h-8 overflow-hidden">
-                      {Array.from({ length: 50 }).map((_, i) => (
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="size-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-200/50">
+                          <Icon name="headphones" className="text-white text-2xl" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-primary text-sm font-bold">{latestAudio.title}</p>
+                          <p className="text-warm-grey text-xs mt-0.5">
+                            {latestAudio.rambam_chapters || "Spoken Talk"}
+                            {audioDuration > 0 && ` · ${Math.ceil(audioDuration / 60)} min`}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="relative mb-2">
                         <div
-                          key={i}
-                          className="flex-1 rounded-full bg-violet-200"
-                          style={{ height: `${8 + ((i * 7 + 13) % 24)}px` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-[10px] text-warm-grey font-medium">
-                    <span>0:00</span>
-                    <span>8:24</span>
-                  </div>
+                          className="w-full h-2 bg-gray-100 rounded-full overflow-hidden cursor-pointer"
+                          onClick={(e) => {
+                            if (!audioRef.current || !audioDuration) return;
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const pct = (e.clientX - rect.left) / rect.width;
+                            audioRef.current.currentTime = pct * audioDuration;
+                          }}
+                        >
+                          <div
+                            className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-200"
+                            style={{ width: `${audioProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-[10px] text-warm-grey font-medium mb-2">
+                        <span>{formatTime(audioCurrentTime)}</span>
+                        <span>{audioDuration > 0 ? formatTime(audioDuration) : "--:--"}</span>
+                      </div>
 
-                  <div className="flex items-center justify-center gap-6 mt-4">
-                    <button className="text-warm-grey hover:text-primary transition-colors cursor-pointer">
-                      <Icon name="replay_10" className="text-2xl" />
-                    </button>
-                    <button className="size-12 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-lg hover:bg-violet-700 transition-colors cursor-pointer">
-                      <Icon name="play_arrow" className="text-2xl" filled />
-                    </button>
-                    <button className="text-warm-grey hover:text-primary transition-colors cursor-pointer">
-                      <Icon name="forward_30" className="text-2xl" />
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-warm-grey text-center uppercase tracking-widest mt-4">
-                    AI-generated podcast · Updated daily
-                  </p>
+                      <div className="flex items-center justify-center gap-6 mt-2">
+                        <button onClick={skipBack} className="text-warm-grey hover:text-primary transition-colors cursor-pointer">
+                          <Icon name="replay_10" className="text-2xl" />
+                        </button>
+                        <button
+                          onClick={togglePlay}
+                          className="size-12 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-lg hover:bg-violet-700 transition-colors cursor-pointer"
+                        >
+                          <Icon name={isPlaying ? "pause" : "play_arrow"} className="text-2xl" filled />
+                        </button>
+                        <button onClick={skipForward} className="text-warm-grey hover:text-primary transition-colors cursor-pointer">
+                          <Icon name="forward_30" className="text-2xl" />
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-warm-grey text-center uppercase tracking-widest mt-4">
+                        Spoken Torah Talk · The Rambam Experience
+                      </p>
+                    </>
+                  ) : (
+                    <div className="text-center py-6">
+                      <Icon name="headphones" className="text-3xl text-warm-grey mb-2" />
+                      <p className="text-warm-grey text-sm">No audio talks available yet.</p>
+                      <p className="text-warm-grey text-xs mt-1">Check back soon!</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

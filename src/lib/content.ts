@@ -25,6 +25,8 @@ export interface ContentRow {
   created_at: string;
   updated_at: string;
   published_at?: string;
+  media_url?: string;
+  media_type?: string;
 }
 
 /**
@@ -64,6 +66,8 @@ function contentToInsight(content: ContentRow): InsightArticle {
       ? `Daily Rambam: ${content.rambam_chapters}`
       : "Daily Rambam",
     sections,
+    mediaUrl: content.media_url || undefined,
+    mediaType: content.media_type || undefined,
   };
 }
 
@@ -117,6 +121,55 @@ export async function fetchLatestInsight(): Promise<InsightArticle | null> {
     return contentToInsight(data);
   } catch {
     return null;
+  }
+}
+
+/**
+ * Fetch the latest published content that has audio (media_url).
+ */
+export async function fetchLatestAudio(): Promise<ContentRow | null> {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("content")
+      .select("*")
+      .eq("status", "published")
+      .not("media_url", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch all published content that has audio.
+ */
+export async function fetchAllAudio(): Promise<ContentRow[]> {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("content")
+      .select("*")
+      .eq("status", "published")
+      .not("media_url", "is", null)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching audio content:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch {
+    return [];
   }
 }
 

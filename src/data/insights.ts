@@ -9,6 +9,8 @@ export interface InsightArticle {
   title: string;
   subtitle: string;
   sections: InsightSection[];
+  mediaUrl?: string;
+  mediaType?: string;
 }
 
 export interface InsightSection {
