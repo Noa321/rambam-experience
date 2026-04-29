@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
-import { DM_Sans, Inter, Literata, Noto_Serif_Hebrew } from "next/font/google";
+import { Inter, Literata, Noto_Serif_Hebrew } from "next/font/google";
 import "./globals.css";
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-dm-sans",
-  weight: ["300", "400", "500", "600", "700"],
-});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,7 +22,8 @@ const notoSerifHebrew = Noto_Serif_Hebrew({
 
 export const metadata: Metadata = {
   title: "The Rambam Experience",
-  description: "Master the entire Mishneh Torah with a gamified, daily learning path.",
+  description:
+    "Daily Torah insights on the Rambam's Mishneh Torah — three chapters a day.",
 };
 
 export default function RootLayout({
@@ -45,7 +40,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${dmSans.variable} ${inter.variable} ${literata.variable} ${notoSerifHebrew.variable} antialiased`}
+        className={`${inter.variable} ${literata.variable} ${notoSerifHebrew.variable} antialiased`}
       >
         {children}
       </body>

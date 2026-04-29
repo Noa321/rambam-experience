@@ -2,7 +2,6 @@ import { getSupabase } from "@/lib/supabase";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import AudioPlayer from "./AudioPlayer";
 
 interface ContentRecord {
   id: string;
@@ -12,8 +11,9 @@ interface ContentRecord {
   hilchot: string;
   hook: string;
   summary: string;
-  media_url: string;
-  media_type: string;
+  body: string;
+  body_format: string;
+  media_url: string | null;
   rambam_date: string;
   published_at: string;
 }
@@ -35,11 +35,11 @@ export async function generateMetadata({
 
   return {
     title: `${data.title} | The Rambam Experience`,
-    description: data.summary || `Daily talk on ${data.rambam_chapters}`,
+    description: data.summary || `D'var Torah on ${data.rambam_chapters}`,
   };
 }
 
-export default async function ListenPage({
+export default async function ReadPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -50,12 +50,12 @@ export default async function ListenPage({
   const { data, error } = await supabase
     .from("content")
     .select(
-      "id,title,rambam_chapters,sefer,hilchot,hook,summary,media_url,media_type,rambam_date,published_at"
+      "id,title,rambam_chapters,sefer,hilchot,hook,summary,body,body_format,media_url,rambam_date,published_at"
     )
     .eq("id", id)
     .single();
 
-  if (error || !data || !data.media_url) {
+  if (error || !data) {
     notFound();
   }
 
@@ -73,8 +73,8 @@ export default async function ListenPage({
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-cloud-gray">
-        <div className="max-w-[600px] mx-auto px-6 h-16 flex items-center">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-cloud-gray">
+        <div className="max-w-[680px] mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <svg
               width="24"
@@ -103,49 +103,64 @@ export default async function ListenPage({
               </span>
             </div>
           </Link>
+
+          {content.media_url && (
+            <Link
+              href={`/listen/${content.id}`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-ink hover:text-oxide-red transition-colors"
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{
+                  fontSize: "18px",
+                  fontVariationSettings: "'FILL' 1",
+                }}
+              >
+                play_arrow
+              </span>
+              Listen
+            </Link>
+          )}
         </div>
       </header>
 
-      <div className="max-w-[600px] mx-auto px-6 py-12">
-        {/* Content */}
-        <div className="mb-10">
-          <p className="text-xs font-semibold tracking-[3px] uppercase text-oxide-red mb-4">
-            Daily Talk
+      {/* Article */}
+      <article className="max-w-[680px] mx-auto px-6 py-12">
+        <div className="mb-10 text-center">
+          <p className="text-xs font-semibold tracking-[3px] uppercase text-oxide-red mb-6">
+            {formattedDate}
           </p>
-          <h1 className="font-serif text-[28px] font-semibold text-slate-ink leading-tight mb-4">
+          <h1 className="font-serif text-[32px] sm:text-[40px] font-semibold text-slate-ink leading-[1.15] mb-4">
             {content.title}
           </h1>
-          <p className="font-serif text-base text-oxide-red/80 italic leading-relaxed mb-5">
-            {content.hook}
+          <p className="text-blue-slate text-sm">
+            {content.rambam_chapters}
+            <span className="mx-2 text-cloud-gray">|</span>
+            Sefer {content.sefer}
           </p>
-          <div className="text-sm text-light-slate flex flex-wrap gap-4">
-            <span>{content.rambam_chapters}</span>
-            <span>{formattedDate}</span>
-          </div>
         </div>
 
-        {/* Audio Player */}
-        <AudioPlayer src={content.media_url} title={content.title} />
-
-        {/* Summary */}
-        {content.summary && (
-          <div className="mt-10 pt-8 border-t border-cloud-gray">
-            <p className="text-xs font-semibold tracking-[3px] uppercase text-light-slate mb-4">
-              About This Talk
-            </p>
-            <p className="font-serif text-base text-slate-ink leading-relaxed">
-              {content.summary}
-            </p>
+        {/* Body - render HTML */}
+        {content.body_format === "html" ? (
+          <div
+            className="prose-rambam"
+            dangerouslySetInnerHTML={{ __html: content.body }}
+          />
+        ) : (
+          <div className="font-serif text-base text-slate-ink leading-[1.75] whitespace-pre-wrap">
+            {content.body}
           </div>
         )}
+      </article>
 
-        {/* Footer */}
-        <footer className="mt-16 pt-6 border-t border-cloud-gray text-center">
+      {/* Footer */}
+      <footer className="border-t border-cloud-gray py-10 px-6">
+        <div className="max-w-[680px] mx-auto text-center">
           <p className="text-sm text-light-slate">
             The Rambam Experience
           </p>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 }

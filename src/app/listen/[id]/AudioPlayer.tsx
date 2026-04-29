@@ -73,7 +73,7 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
   const progress = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="bg-[#2C3E50] rounded-2xl p-8 shadow-lg">
+    <div className="bg-slate-ink rounded-2xl p-8 shadow-lg">
       <audio ref={audioRef} src={src} preload="metadata" />
 
       {/* Play button + info */}
@@ -81,7 +81,7 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
         <button
           onClick={togglePlay}
           disabled={isLoading}
-          className="w-16 h-16 rounded-full bg-[#C0392B] hover:bg-[#A93226] transition-colors flex items-center justify-center flex-shrink-0 disabled:opacity-50"
+          className="w-16 h-16 rounded-full bg-oxide-red hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 disabled:opacity-50"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           <span
@@ -95,10 +95,10 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
           </span>
         </button>
         <div>
-          <p className="font-[family-name:var(--font-dm-sans)] text-white text-lg font-medium leading-snug">
+          <p className="text-white text-lg font-medium leading-snug">
             {title}
           </p>
-          <p className="font-[family-name:var(--font-dm-sans)] text-[#A0AEC0] text-sm mt-1">
+          <p className="text-light-slate text-sm mt-1">
             {isLoading
               ? "Loading..."
               : `${formatTime(currentTime)} / ${formatTime(duration)}`}
@@ -108,7 +108,7 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
 
       {/* Progress bar */}
       <div
-        className="h-2 bg-[#4A5568] rounded-full cursor-pointer group"
+        className="h-2 bg-blue-slate/30 rounded-full cursor-pointer group"
         onClick={handleSeek}
         role="slider"
         aria-label="Audio progress"
@@ -117,7 +117,7 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
         aria-valuemax={100}
       >
         <div
-          className="h-full bg-[#C0392B] rounded-full relative transition-all"
+          className="h-full bg-oxide-red rounded-full relative transition-all"
           style={{ width: `${progress}%` }}
         >
           <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" />
