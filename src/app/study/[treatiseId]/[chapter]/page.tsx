@@ -203,7 +203,8 @@ export default function StudyPage() {
             {halachot.map((h) => (
               <article
                 key={h.number}
-                className="rounded-xl p-4 sm:p-5 bg-ice-white"
+                className="rounded-xl p-4 sm:p-5 border border-cloud-gray"
+                style={{ backgroundColor: "#FAFAF8" }}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-7 h-7 rounded bg-slate-ink flex items-center justify-center text-white text-xs font-semibold">
@@ -215,15 +216,14 @@ export default function StudyPage() {
                   <div className="space-y-4">
                     <div className="text-right" dir="rtl">
                       <div
-                        className="text-lg leading-loose text-slate-ink"
-                        style={{ fontFamily: "var(--font-hebrew)" }}
+                        className="sefaria-text-he text-lg text-slate-ink"
                         dangerouslySetInnerHTML={{ __html: h.hebrew }}
                       />
                     </div>
                     <div className="h-px bg-cloud-gray" />
                     <div>
                       <div
-                        className="text-[15px] leading-relaxed text-blue-slate"
+                        className="sefaria-text text-[15px] text-slate-ink"
                         dangerouslySetInnerHTML={{ __html: h.english }}
                       />
                     </div>
@@ -233,8 +233,7 @@ export default function StudyPage() {
                 {langMode === "hebrew" && (
                   <div className="text-right" dir="rtl">
                     <div
-                      className="text-xl leading-loose text-slate-ink"
-                      style={{ fontFamily: "var(--font-hebrew)" }}
+                      className="sefaria-text-he text-xl text-slate-ink"
                       dangerouslySetInnerHTML={{ __html: h.hebrew }}
                     />
                   </div>
@@ -243,7 +242,7 @@ export default function StudyPage() {
                 {langMode === "english" && (
                   <div>
                     <div
-                      className="text-base leading-relaxed text-slate-ink"
+                      className="sefaria-text text-base text-slate-ink"
                       dangerouslySetInnerHTML={{ __html: h.english }}
                     />
                   </div>

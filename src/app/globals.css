@@ -102,3 +102,55 @@ h1, h2, h3, h4 {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Sefaria text styling for the study reader */
+.sefaria-text {
+  font-family: var(--font-serif);
+  line-height: 1.85;
+}
+
+.sefaria-text br {
+  display: block;
+  content: "";
+  margin-top: 0.75em;
+}
+
+.sefaria-text i:not(.footnote) {
+  font-style: italic;
+}
+
+.sefaria-text .footnote {
+  display: block;
+  font-style: normal;
+  font-size: 0.8em;
+  line-height: 1.6;
+  color: #64748B;
+  border-left: 2px solid #E5E7EB;
+  padding-left: 0.75em;
+  margin: 0.75em 0;
+}
+
+.sefaria-text sup.footnote-marker {
+  display: none;
+}
+
+.sefaria-text b, .sefaria-text strong {
+  font-weight: 600;
+}
+
+/* Hebrew Sefaria text */
+.sefaria-text-he {
+  font-family: "Noto Serif Hebrew", serif;
+  line-height: 2;
+}
+
+.sefaria-text-he br {
+  display: block;
+  content: "";
+  margin-top: 0.5em;
+}
+
+.sefaria-text-he .footnote,
+.sefaria-text-he sup.footnote-marker {
+  display: none;
+}
