@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { getDailyStudy } from "@/lib/daily-study";
 import Link from "next/link";
 
 interface ContentRecord {
@@ -65,34 +66,6 @@ function formatShortDate(dateStr: string) {
   });
 }
 
-/* Parse "Sotah 1-3" into individual chapter objects with Sefaria links */
-function parseChapters(
-  rambamChapters: string,
-  hilchot: string
-): { name: string; sefariaUrl: string }[] {
-  const match = rambamChapters.match(/(.+?)\s+(\d+)-(\d+)/);
-  if (match) {
-    const rawName = match[1];
-    const start = parseInt(match[2]);
-    const end = parseInt(match[3]);
-    const chapters = [];
-    for (let i = start; i <= end; i++) {
-      const sefariaRef = `Mishneh_Torah,_${rawName.replace(/ /g, "_")}.${i}`;
-      chapters.push({
-        name: `${hilchot || rawName}, Chapter ${i}`,
-        sefariaUrl: `https://www.sefaria.org/${sefariaRef}`,
-      });
-    }
-    return chapters;
-  }
-  return [
-    {
-      name: rambamChapters,
-      sefariaUrl: `https://www.sefaria.org/Mishneh_Torah`,
-    },
-  ];
-}
-
 function getWeekDays() {
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -128,11 +101,12 @@ function getBooks() {
 export default async function Home() {
   const today = await getTodaysContent();
   const recent = await getRecentContent();
+  const dailyStudy = getDailyStudy();
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-cloud-gray">
+      {/* Header — solid white, no transparency */}
+      <header className="sticky top-0 z-50 bg-white border-b border-cloud-gray">
         <div className="max-w-[980px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
@@ -144,15 +118,8 @@ export default async function Home() {
               xmlns="http://www.w3.org/2000/svg"
               className="flex-shrink-0"
             >
-              <path
-                d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z"
-                fill="#334155"
-              />
-              <path
-                d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z"
-                fill="#334155"
-                opacity="0.7"
-              />
+              <path d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z" fill="#334155" />
+              <path d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z" fill="#334155" opacity="0.7" />
               <path d="M18 6H22V34H18V6Z" fill="#334155" opacity="0.4" />
               <line x1="11" y1="12" x2="16" y2="12" stroke="white" strokeWidth="1.2" />
               <line x1="11" y1="16" x2="15" y2="16" stroke="white" strokeWidth="1.2" />
@@ -187,27 +154,27 @@ export default async function Home() {
 
       {/* Hero */}
       {today ? (
-        <section className="pt-10 sm:pt-16 pb-8 sm:pb-12 px-4 sm:px-6">
+        <section className="pt-10 sm:pt-16 pb-6 sm:pb-10 px-4 sm:px-6">
           <div className="max-w-[680px] mx-auto text-center">
             <p className="text-[10px] sm:text-xs font-semibold tracking-[2px] sm:tracking-[3px] uppercase text-oxide-red mb-3 sm:mb-5">
               {formatDate(today.rambam_date || today.published_at)}
             </p>
 
-            <h1 className="font-serif text-[28px] sm:text-[44px] font-semibold text-slate-ink leading-[1.15] mb-3 sm:mb-5">
+            <h1 className="font-serif text-[26px] sm:text-[44px] font-semibold text-slate-ink leading-[1.15] mb-3 sm:mb-5">
               {today.title}
             </h1>
 
-            <p className="text-blue-slate text-sm mb-1 sm:mb-2">
+            <p className="text-blue-slate text-sm mb-1">
               {today.rambam_chapters}
               <span className="mx-2 text-cloud-gray">|</span>
               Sefer {today.sefer}
             </p>
-            <p className="text-light-slate text-xs mb-6 sm:mb-8">
+            <p className="text-light-slate text-xs mb-5 sm:mb-7">
               {today.hilchot}
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center justify-center gap-3">
               <Link
                 href={`/read/${today.id}`}
                 className="inline-flex items-center gap-2 bg-slate-ink text-white text-sm font-medium px-6 py-2.5 hover:opacity-90 transition-opacity"
@@ -223,10 +190,7 @@ export default async function Home() {
                 >
                   <span
                     className="material-symbols-outlined"
-                    style={{
-                      fontSize: "16px",
-                      fontVariationSettings: "'FILL' 1",
-                    }}
+                    style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}
                   >
                     play_arrow
                   </span>
@@ -239,7 +203,7 @@ export default async function Home() {
       ) : (
         <section className="pt-12 pb-8 px-4">
           <div className="max-w-[680px] mx-auto text-center">
-            <h1 className="font-serif text-[28px] sm:text-[40px] font-semibold text-slate-ink leading-[1.1] mb-4">
+            <h1 className="font-serif text-[26px] sm:text-[40px] font-semibold text-slate-ink leading-[1.1] mb-4">
               The Rambam Experience
             </h1>
             <p className="text-blue-slate text-base">
@@ -251,94 +215,89 @@ export default async function Home() {
 
       {/* Hook Quote */}
       {today?.hook && (
-        <section className="pb-8 sm:pb-12 px-4 sm:px-6">
-          <div className="max-w-[500px] mx-auto text-center">
-            <div className="w-10 h-px bg-cloud-gray mx-auto mb-5" />
-            <p className="font-serif text-[15px] sm:text-base text-blue-slate italic leading-relaxed">
+        <section className="pb-6 sm:pb-10 px-4 sm:px-6">
+          <div className="max-w-[480px] mx-auto text-center">
+            <div className="w-10 h-px bg-cloud-gray mx-auto mb-4" />
+            <p className="font-serif text-[14px] sm:text-base text-blue-slate italic leading-relaxed">
               {today.hook}
             </p>
-            <div className="w-10 h-px bg-cloud-gray mx-auto mt-5" />
+            <div className="w-10 h-px bg-cloud-gray mx-auto mt-4" />
           </div>
         </section>
       )}
 
-      {/* Today's Chapters — linked to Sefaria */}
-      {today && (
-        <section className="pb-8 sm:pb-12 px-4 sm:px-6">
-          <div className="max-w-[480px] mx-auto">
-            <h2 className="font-serif text-lg font-semibold text-slate-ink mb-4 text-center">
-              Today&#39;s chapters
-            </h2>
-            <div className="bg-ice-white rounded-xl overflow-hidden">
-              {parseChapters(today.rambam_chapters, today.hilchot).map(
-                (ch, i, arr) => (
-                  <a
-                    key={i}
-                    href={ch.sefariaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center justify-between px-4 py-3.5 hover:bg-cloud-gray/40 transition-colors ${
-                      i < arr.length - 1 ? "border-b border-cloud-gray" : ""
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-slate-ink">
-                        {ch.name}
-                      </p>
-                      <p className="text-[11px] text-light-slate mt-0.5">
-                        Sefer {today.sefer}
-                      </p>
-                    </div>
-                    <span
-                      className="material-symbols-outlined text-light-slate"
-                      style={{ fontSize: "16px" }}
-                    >
-                      open_in_new
-                    </span>
-                  </a>
-                )
-              )}
-            </div>
-            <p className="text-[10px] text-light-slate text-center mt-2">
-              Opens on Sefaria.org
-            </p>
+      {/* Today's Chapters — from daily-study.ts cycle calculator, linked to Sefaria reader */}
+      <section className="pb-6 sm:pb-10 px-4 sm:px-6">
+        <div className="max-w-[480px] mx-auto">
+          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-3 text-center">
+            Today&#39;s chapters
+          </h2>
+          <div className="bg-ice-white rounded-xl overflow-hidden">
+            {dailyStudy.chapters.map((ch, i, arr) => (
+              <Link
+                key={`${ch.treatise.id}-${ch.chapter}`}
+                href={`/study/${ch.treatise.id}/${ch.chapter}`}
+                className={`flex items-center justify-between px-4 py-3 hover:bg-cloud-gray/40 transition-colors ${
+                  i < arr.length - 1 ? "border-b border-cloud-gray" : ""
+                }`}
+              >
+                <div>
+                  <p className="text-sm font-medium text-slate-ink">
+                    {ch.treatise.name}, Chapter {ch.chapter}
+                  </p>
+                  <p className="text-[11px] text-light-slate mt-0.5">
+                    Sefer {ch.bookEng}
+                  </p>
+                </div>
+                <span
+                  className="material-symbols-outlined text-light-slate"
+                  style={{ fontSize: "16px" }}
+                >
+                  chevron_right
+                </span>
+              </Link>
+            ))}
           </div>
-        </section>
-      )}
+          <p className="text-[10px] text-light-slate text-center mt-1.5">
+            Day {dailyStudy.dayOfCycle} of {dailyStudy.totalDays} in cycle {dailyStudy.cycleNumber}
+          </p>
+        </div>
+      </section>
 
       {/* Your Progress */}
-      <section className="pb-8 sm:pb-12 px-4 sm:px-6">
+      <section className="pb-6 sm:pb-10 px-4 sm:px-6">
         <div className="max-w-[480px] mx-auto">
-          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-4 text-center">
+          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-3 text-center">
             Your progress
           </h2>
-          <div className="flex items-center justify-center gap-8 mb-5">
+          <div className="flex items-center justify-center gap-8 mb-4">
             {/* Cycle Ring */}
             <div className="relative w-20 h-20">
               <svg viewBox="0 0 96 96" className="w-full h-full">
-                <circle
-                  cx="48" cy="48" r="40"
-                  fill="none" stroke="#E5E7EB" strokeWidth="6"
-                />
+                <circle cx="48" cy="48" r="40" fill="none" stroke="#E5E7EB" strokeWidth="6" />
                 <circle
                   cx="48" cy="48" r="40"
                   fill="none" stroke="#7A3E3E" strokeWidth="6"
-                  strokeDasharray={`${0.25 * 251.3} ${251.3}`}
+                  strokeDasharray={`${(dailyStudy.cycleProgress / 100) * 251.3} ${251.3}`}
                   strokeDashoffset="0"
                   transform="rotate(-90 48 48)"
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-base font-semibold text-slate-ink">25%</span>
+                <span className="text-base font-semibold text-slate-ink">
+                  {dailyStudy.cycleProgress}%
+                </span>
                 <span className="text-[9px] text-light-slate">cycle</span>
               </div>
             </div>
 
             {/* Stats */}
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div>
-                <p className="text-xl font-semibold text-slate-ink">247</p>
+                <p className="text-xl font-semibold text-slate-ink">
+                  {dailyStudy.dayOfCycle * 3}
+                </p>
                 <p className="text-[11px] text-light-slate">chapters studied</p>
               </div>
               <div>
@@ -355,18 +314,20 @@ export default async function Home() {
           </div>
 
           {/* Current Book Progress */}
-          {today && (
+          {dailyStudy.chapters[0] && (
             <div className="bg-ice-white rounded-xl px-4 py-3">
               <div className="flex items-center justify-between mb-1.5">
                 <p className="text-sm font-medium text-slate-ink">
-                  Sefer {today.sefer}
+                  Sefer {dailyStudy.chapters[0].bookEng}
                 </p>
-                <p className="text-xs text-light-slate">42%</p>
+                <p className="text-xs text-light-slate">
+                  {dailyStudy.cycleProgress}%
+                </p>
               </div>
               <div className="h-1.5 bg-cloud-gray rounded-full">
                 <div
                   className="h-full bg-oxide-red rounded-full"
-                  style={{ width: "42%" }}
+                  style={{ width: `${dailyStudy.cycleProgress}%` }}
                 />
               </div>
             </div>
@@ -375,14 +336,14 @@ export default async function Home() {
       </section>
 
       {/* This Week */}
-      <section className="pb-8 sm:pb-12 px-4 sm:px-6">
+      <section className="pb-6 sm:pb-10 px-4 sm:px-6">
         <div className="max-w-[480px] mx-auto">
-          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-4 text-center">
+          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-3 text-center">
             This week
           </h2>
-          <div className="flex items-center justify-center gap-3 sm:gap-4">
+          <div className="flex items-center justify-center gap-3">
             {getWeekDays().map((day, i) => (
-              <div key={i} className="flex flex-col items-center gap-1.5">
+              <div key={i} className="flex flex-col items-center gap-1">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium ${
                     day.isToday
@@ -395,10 +356,7 @@ export default async function Home() {
                   {day.completed && !day.isToday ? (
                     <span
                       className="material-symbols-outlined"
-                      style={{
-                        fontSize: "14px",
-                        fontVariationSettings: "'FILL' 1",
-                      }}
+                      style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}
                     >
                       check
                     </span>
@@ -406,9 +364,7 @@ export default async function Home() {
                     day.label
                   )}
                 </div>
-                <span className="text-[9px] text-light-slate">
-                  {day.dayName}
-                </span>
+                <span className="text-[9px] text-light-slate">{day.dayName}</span>
               </div>
             ))}
           </div>
@@ -416,21 +372,18 @@ export default async function Home() {
       </section>
 
       {/* Browse Mishneh Torah */}
-      <section className="pb-10 sm:pb-16 px-4 sm:px-6">
+      <section className="pb-8 sm:pb-12 px-4 sm:px-6">
         <div className="max-w-[480px] mx-auto">
-          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-4 text-center">
+          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-3 text-center">
             Browse Mishneh Torah
           </h2>
           <div className="grid grid-cols-2 gap-2.5">
             {getBooks().map((book) => (
-              <div
-                key={book.name}
-                className="bg-ice-white rounded-xl px-3.5 py-3"
-              >
+              <div key={book.name} className="bg-ice-white rounded-xl px-3.5 py-3">
                 <p className="text-sm font-medium text-slate-ink mb-0.5">
                   {book.name}
                 </p>
-                <p className="text-[11px] text-light-slate mb-2.5">
+                <p className="text-[11px] text-light-slate mb-2">
                   {book.treatises} sections
                 </p>
                 <div className="h-1 bg-cloud-gray rounded-full">
@@ -447,16 +400,16 @@ export default async function Home() {
 
       {/* Archive */}
       {recent.length > 1 && (
-        <section id="archive" className="pb-10 sm:pb-16 px-4 sm:px-6">
+        <section id="archive" className="pb-8 sm:pb-12 px-4 sm:px-6">
           <div className="max-w-[680px] mx-auto">
-            <h2 className="font-serif text-lg sm:text-2xl font-semibold text-slate-ink mb-5 text-center">
+            <h2 className="font-serif text-lg font-semibold text-slate-ink mb-4 text-center">
               Recent
             </h2>
             <div>
               {recent.slice(1).map((item) => (
                 <article
                   key={item.id}
-                  className="py-4 border-b border-cloud-gray group"
+                  className="py-3.5 border-b border-cloud-gray group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -467,7 +420,7 @@ export default async function Home() {
                         {item.title}
                       </h3>
                       {item.hook && (
-                        <p className="text-xs sm:text-sm text-blue-slate leading-relaxed line-clamp-2">
+                        <p className="text-xs text-blue-slate leading-relaxed line-clamp-2 hidden sm:block">
                           {item.hook}
                         </p>
                       )}
@@ -481,19 +434,14 @@ export default async function Home() {
                         >
                           <span
                             className="material-symbols-outlined"
-                            style={{
-                              fontSize: "14px",
-                              fontVariationSettings: "'FILL' 1",
-                            }}
+                            style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}
                           >
                             play_arrow
                           </span>
                         </Link>
                       )}
                       <span className="text-[10px] text-light-slate whitespace-nowrap">
-                        {formatShortDate(
-                          item.rambam_date || item.published_at
-                        )}
+                        {formatShortDate(item.rambam_date || item.published_at)}
                       </span>
                     </div>
                   </div>
@@ -505,11 +453,9 @@ export default async function Home() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-cloud-gray py-8 px-4">
+      <footer className="border-t border-cloud-gray py-6 px-4">
         <div className="max-w-[980px] mx-auto text-center">
-          <p className="text-xs text-light-slate">
-            The Rambam Experience
-          </p>
+          <p className="text-xs text-light-slate">The Rambam Experience</p>
         </div>
       </footer>
     </div>
