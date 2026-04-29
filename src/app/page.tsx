@@ -66,6 +66,56 @@ function formatShortDate(dateStr: string) {
   });
 }
 
+function parseChapterNames(
+  rambamChapters: string,
+  hilchot: string
+): string[] {
+  const match = rambamChapters.match(/(.+?)\s+(\d+)-(\d+)/);
+  if (match) {
+    const name = match[1];
+    const start = parseInt(match[2]);
+    const end = parseInt(match[3]);
+    const chapters = [];
+    for (let i = start; i <= end; i++) {
+      chapters.push(`${hilchot || name}, Chapter ${i}`);
+    }
+    return chapters;
+  }
+  return [rambamChapters];
+}
+
+function getWeekDays() {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  return days.map((dayName, i) => {
+    const diff = i - dayOfWeek;
+    const date = new Date(today);
+    date.setDate(today.getDate() + diff);
+
+    return {
+      dayName,
+      label: date.getDate().toString(),
+      isToday: i === dayOfWeek,
+      completed: i < dayOfWeek,
+    };
+  });
+}
+
+function getBooks() {
+  return [
+    { name: "Madda", treatises: 5, progress: 100 },
+    { name: "Ahavah", treatises: 6, progress: 100 },
+    { name: "Zemanim", treatises: 10, progress: 100 },
+    { name: "Nashim", treatises: 5, progress: 42 },
+    { name: "Kedushah", treatises: 3, progress: 0 },
+    { name: "Hafla'ah", treatises: 3, progress: 0 },
+    { name: "Zera'im", treatises: 7, progress: 0 },
+    { name: "Avodah", treatises: 8, progress: 0 },
+  ];
+}
+
 export default async function Home() {
   const today = await getTodaysContent();
   const recent = await getRecentContent();
@@ -248,6 +298,197 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* Today's Chapters */}
+      {today && (
+        <section className="pb-16 px-6">
+          <div className="max-w-[520px] mx-auto">
+            <h2 className="font-serif text-xl font-semibold text-slate-ink mb-6 text-center">
+              Today&#39;s chapters
+            </h2>
+            <div className="bg-ice-white rounded-xl overflow-hidden">
+              {today.rambam_chapters.split(/,\s*/).length > 0 &&
+                parseChapterNames(today.rambam_chapters, today.hilchot).map(
+                  (ch, i, arr) => (
+                    <div
+                      key={i}
+                      className={`flex items-center justify-between px-5 py-4 ${
+                        i < arr.length - 1 ? "border-b border-cloud-gray" : ""
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-slate-ink">
+                          {ch}
+                        </p>
+                        <p className="text-xs text-light-slate mt-0.5">
+                          Sefer {today.sefer}
+                        </p>
+                      </div>
+                      <span
+                        className="material-symbols-outlined text-light-slate"
+                        style={{ fontSize: "18px" }}
+                      >
+                        chevron_right
+                      </span>
+                    </div>
+                  )
+                )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Your Progress */}
+      <section className="pb-16 px-6">
+        <div className="max-w-[520px] mx-auto">
+          <h2 className="font-serif text-xl font-semibold text-slate-ink mb-6 text-center">
+            Your progress
+          </h2>
+          <div className="flex items-center justify-center gap-10 mb-8">
+            {/* Cycle Ring */}
+            <div className="relative w-24 h-24">
+              <svg viewBox="0 0 96 96" className="w-full h-full">
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="none"
+                  stroke="#E5E7EB"
+                  strokeWidth="6"
+                />
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="none"
+                  stroke="#7A3E3E"
+                  strokeWidth="6"
+                  strokeDasharray={`${0.25 * 251.3} ${251.3}`}
+                  strokeDashoffset="0"
+                  transform="rotate(-90 48 48)"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-lg font-semibold text-slate-ink">
+                  25%
+                </span>
+                <span className="text-[10px] text-light-slate">cycle</span>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="space-y-4">
+              <div>
+                <p className="text-2xl font-semibold text-slate-ink">247</p>
+                <p className="text-xs text-light-slate">chapters studied</p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-slate-ink">12</p>
+                <p className="text-xs text-light-slate">day streak</p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-slate-ink">
+                  4{" "}
+                  <span className="text-sm font-normal text-light-slate">
+                    / 14
+                  </span>
+                </p>
+                <p className="text-xs text-light-slate">books completed</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Current Book Progress */}
+          {today && (
+            <div className="bg-ice-white rounded-xl px-5 py-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-slate-ink">
+                  Sefer {today.sefer}
+                </p>
+                <p className="text-xs text-light-slate">42%</p>
+              </div>
+              <div className="h-1.5 bg-cloud-gray rounded-full">
+                <div
+                  className="h-full bg-oxide-red rounded-full"
+                  style={{ width: "42%" }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* This Week */}
+      <section className="pb-16 px-6">
+        <div className="max-w-[520px] mx-auto">
+          <h2 className="font-serif text-xl font-semibold text-slate-ink mb-6 text-center">
+            This week
+          </h2>
+          <div className="flex items-center justify-center gap-4">
+            {getWeekDays().map((day, i) => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium ${
+                    day.isToday
+                      ? "border-2 border-slate-ink text-slate-ink"
+                      : day.completed
+                        ? "bg-slate-ink text-white"
+                        : "border border-cloud-gray text-light-slate"
+                  }`}
+                >
+                  {day.completed && !day.isToday ? (
+                    <span
+                      className="material-symbols-outlined"
+                      style={{
+                        fontSize: "16px",
+                        fontVariationSettings: "'FILL' 1",
+                      }}
+                    >
+                      check
+                    </span>
+                  ) : (
+                    day.label
+                  )}
+                </div>
+                <span className="text-[10px] text-light-slate">
+                  {day.dayName}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Browse Mishneh Torah */}
+      <section className="pb-20 px-6">
+        <div className="max-w-[520px] mx-auto">
+          <h2 className="font-serif text-xl font-semibold text-slate-ink mb-6 text-center">
+            Browse Mishneh Torah
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {getBooks().map((book) => (
+              <div
+                key={book.name}
+                className="bg-ice-white rounded-xl px-4 py-4"
+              >
+                <p className="text-sm font-medium text-slate-ink mb-1">
+                  {book.name}
+                </p>
+                <p className="text-xs text-light-slate mb-3">
+                  {book.treatises} sections
+                </p>
+                <div className="h-1 bg-cloud-gray rounded-full">
+                  <div
+                    className="h-full bg-oxide-red rounded-full"
+                    style={{ width: `${book.progress}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Archive */}
       {recent.length > 1 && (
