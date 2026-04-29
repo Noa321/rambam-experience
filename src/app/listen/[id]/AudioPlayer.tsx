@@ -13,6 +13,7 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -51,6 +52,18 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
       setIsPlaying(true);
     }
   }, [isPlaying]);
+
+  const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2];
+
+  const cycleSpeed = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const currentIndex = speeds.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % speeds.length;
+    const nextSpeed = speeds[nextIndex];
+    audio.playbackRate = nextSpeed;
+    setPlaybackRate(nextSpeed);
+  }, [playbackRate]);
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -122,6 +135,17 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
         >
           <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
+      </div>
+
+      {/* Speed control */}
+      <div className="mt-4 flex items-center justify-end">
+        <button
+          onClick={cycleSpeed}
+          className="px-3 py-1.5 rounded-full text-xs font-semibold text-light-slate border border-light-slate/30 hover:text-white hover:border-white/50 transition-colors"
+          aria-label={`Playback speed ${playbackRate}x`}
+        >
+          {playbackRate === 1 ? "1x" : `${playbackRate}x`}
+        </button>
       </div>
     </div>
   );
