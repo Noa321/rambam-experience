@@ -22,7 +22,25 @@ interface ContentRecord {
 async function getTodaysContent(): Promise<ContentRecord | null> {
   const supabase = getSupabase();
 
-  const { data, error } = await supabase
+  // Today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+
+  // First try: get content matching today's rambam_date
+  const { data: todayData } = await supabase
+    .from("content")
+    .select(
+      "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
+    )
+    .eq("content_type", "dvar_torah")
+    .eq("status", "published")
+    .eq("rambam_date", today)
+    .limit(1)
+    .single();
+
+  if (todayData) return todayData as ContentRecord;
+
+  // Fallback: get the most recently published content
+  const { data: recentData } = await supabase
     .from("content")
     .select(
       "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
@@ -33,8 +51,8 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
     .limit(1)
     .single();
 
-  if (error || !data) return null;
-  return data as ContentRecord;
+  if (recentData) return recentData as ContentRecord;
+  return null;
 }
 
 async function getRecentContent(): Promise<ContentRecord[]> {
