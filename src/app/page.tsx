@@ -2,6 +2,9 @@ import { getSupabase } from "@/lib/supabase";
 import { getDailyStudy } from "@/lib/daily-study";
 import Link from "next/link";
 
+
+// Revalidate every 5 minutes so new content appears without a redeploy
+export const revalidate = 300;
 interface ContentRecord {
   id: string;
   title: string;
