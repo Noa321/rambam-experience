@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import { getDailyStudy } from "@/lib/daily-study";
+import { books } from "@/data/books";
 import Link from "next/link";
 
 
@@ -87,11 +87,61 @@ function formatShortDate(dateStr: string) {
   });
 }
 
+const HILCHOT_TO_TREATISE: Record<string, string> = {};
+for (const book of books) {
+  for (const t of book.treatises) {
+    HILCHOT_TO_TREATISE[t.name.toLowerCase()] = t.id;
+  }
+}
+const ALIASES: Record<string, string> = {
+  "sotah": "sotah", "issurei biah": "intercourse", "forbidden intercourse": "intercourse",
+  "chametz u\'matzah": "chametz", "chametz umatzah": "chametz",
+  "shofar, sukkah and lulav": "shofar", "shofar, sukkah, vlulav": "shofar",
+  "foundations of the torah": "foundations", "human dispositions": "dispositions",
+  "torah study": "torah-study", "foreign worship": "foreign-worship",
+  "reading the shema": "shema", "prayer": "prayer", "tefillin": "tefillin",
+  "fringes": "fringes", "blessings": "blessings", "circumcision": "circumcision",
+  "sabbath": "sabbath", "eruvin": "eruvin", "marriage": "marriage", "divorce": "divorce",
+  "forbidden foods": "forbidden-foods", "ritual slaughter": "slaughter", "repentance": "repentance",
+};
+for (const [alias, id] of Object.entries(ALIASES)) { HILCHOT_TO_TREATISE[alias] = id; }
+
+interface ParsedChapter { treatiseId: string; treatiseName: string; chapter: number; bookEng: string; }
+
+function parseChaptersFromContent(rambamChapters: string, hilchot: string, sefer: string): ParsedChapter[] {
+  const chapters: ParsedChapter[] = [];
+  const parts = rambamChapters.split(",").map(s => s.trim());
+  for (const part of parts) {
+    const match = part.match(/^(.+?)\s+([\d]+(?:\s*[-\u2013]\s*[\d]+)?)$/);
+    if (!match) continue;
+    const treatiseName = match[1].trim();
+    const chapterStr = match[2].trim();
+    const treatiseId = HILCHOT_TO_TREATISE[treatiseName.toLowerCase()];
+    if (!treatiseId) continue;
+    let displayName = treatiseName;
+    let bookEng = sefer;
+    for (const book of books) {
+      for (const t of book.treatises) {
+        if (t.id === treatiseId) { displayName = t.name; bookEng = book.eng; break; }
+      }
+    }
+    const rangeParts = chapterStr.split(/[-\u2013]/).map(s => parseInt(s.trim()));
+    if (rangeParts.length === 2) {
+      for (let ch = rangeParts[0]; ch <= rangeParts[1]; ch++) {
+        chapters.push({ treatiseId, treatiseName: displayName, chapter: ch, bookEng });
+      }
+    } else if (rangeParts.length === 1 && !isNaN(rangeParts[0])) {
+      chapters.push({ treatiseId, treatiseName: displayName, chapter: rangeParts[0], bookEng });
+    }
+  }
+  return chapters;
+}
+
 
 export default async function Home() {
   const today = await getTodaysContent();
   const recent = await getRecentContent();
-  const dailyStudy = getDailyStudy();
+  const todayChapters = today ? parseChaptersFromContent(today.rambam_chapters, today.hilchot, today.sefer) : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -216,24 +266,24 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Today's Chapters — from daily-study.ts cycle calculator, linked to Sefaria reader */}
+      {todayChapters.length > 0 && (
       <section className="pb-6 sm:pb-10 px-4 sm:px-6">
         <div className="max-w-[480px] mx-auto">
           <h2 className="font-serif text-lg font-semibold text-slate-ink mb-3 text-center">
             Today&#39;s chapters
           </h2>
           <div className="bg-ice-white rounded-xl overflow-hidden">
-            {dailyStudy.chapters.map((ch, i, arr) => (
+            {todayChapters.map((ch, i, arr) => (
               <Link
-                key={`${ch.treatise.id}-${ch.chapter}`}
-                href={`/study/${ch.treatise.id}/${ch.chapter}`}
+                key={`${ch.treatiseId}-${ch.chapter}`}
+                href={`/study/${ch.treatiseId}/${ch.chapter}`}
                 className={`flex items-center justify-between px-4 py-3 hover:bg-cloud-gray/40 transition-colors ${
                   i < arr.length - 1 ? "border-b border-cloud-gray" : ""
                 }`}
               >
                 <div>
                   <p className="text-sm font-medium text-slate-ink">
-                    {ch.treatise.name}, Chapter {ch.chapter}
+                    {ch.treatiseName}, Chapter {ch.chapter}
                   </p>
                   <p className="text-[11px] text-light-slate mt-0.5">
                     Sefer {ch.bookEng}
@@ -248,11 +298,9 @@ export default async function Home() {
               </Link>
             ))}
           </div>
-          <p className="text-[10px] text-light-slate text-center mt-1.5">
-            Day {dailyStudy.dayOfCycle} of {dailyStudy.totalDays} in cycle {dailyStudy.cycleNumber}
-          </p>
         </div>
       </section>
+      )}
 
       {/* Archive */}
       {recent.length > 1 && (
