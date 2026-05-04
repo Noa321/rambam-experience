@@ -58,6 +58,8 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
 async function getRecentContent(): Promise<ContentRecord[]> {
   const supabase = getSupabase();
 
+  const today = new Date().toISOString().split("T")[0];
+
   const { data, error } = await supabase
     .from("content")
     .select(
@@ -65,7 +67,8 @@ async function getRecentContent(): Promise<ContentRecord[]> {
     )
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
-    .order("published_at", { ascending: false })
+    .lte("rambam_date", today)
+    .order("rambam_date", { ascending: false })
     .limit(7);
 
   if (error || !data) return [];
@@ -306,9 +309,17 @@ export default async function Home() {
       {recent.length > 1 && (
         <section id="archive" className="pb-8 sm:pb-12 px-4 sm:px-6">
           <div className="max-w-[680px] mx-auto">
-            <h2 className="font-serif text-lg font-semibold text-slate-ink mb-4 text-center">
-              Recent
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-serif text-lg font-semibold text-slate-ink">
+                Recent
+              </h2>
+              <Link
+                href="/archive"
+                className="text-xs font-medium text-blue-slate hover:text-slate-ink transition-colors"
+              >
+                View all
+              </Link>
+            </div>
             <div>
               {recent.slice(1).map((item) => (
                 <article
@@ -316,7 +327,7 @@ export default async function Home() {
                   className="py-3.5 border-b border-cloud-gray group"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
+                    <Link href={`/read/${item.id}`} className="flex-1 min-w-0">
                       <p className="text-[10px] font-medium text-oxide-red tracking-wide uppercase mb-1">
                         {item.rambam_chapters}
                       </p>
@@ -328,7 +339,7 @@ export default async function Home() {
                           {item.hook}
                         </p>
                       )}
-                    </div>
+                    </Link>
                     <div className="flex items-center gap-2 flex-shrink-0 pt-1">
                       {item.media_url && (
                         <Link
