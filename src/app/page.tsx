@@ -183,7 +183,7 @@ export default async function Home() {
           <nav className="flex items-center gap-6">
             <span className="text-sm font-medium text-slate-ink">Today</span>
             <a
-              href="#archive"
+              href="/archive"
               className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors"
             >
               Archive
