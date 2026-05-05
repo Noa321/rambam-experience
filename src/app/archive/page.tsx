@@ -59,6 +59,7 @@ export default async function ArchivePage() {
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/" className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors">Today</Link>
+            <Link href="/library" className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors">Library</Link>
             <span className="text-sm font-medium text-slate-ink">Archive</span>
           </nav>
         </div>

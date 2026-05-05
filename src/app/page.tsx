@@ -185,6 +185,12 @@ export default async function Home() {
           {/* Nav */}
           <nav className="flex items-center gap-6">
             <span className="text-sm font-medium text-slate-ink">Today</span>
+            <Link
+              href="/library"
+              className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors"
+            >
+              Library
+            </Link>
             <a
               href="/archive"
               className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors"
