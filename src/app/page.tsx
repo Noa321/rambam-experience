@@ -23,7 +23,7 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
   const supabase = getSupabase();
 
   // Today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
   // First try: get content matching today's rambam_date
   const { data: todayData } = await supabase
@@ -47,7 +47,8 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
     )
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
-    .order("published_at", { ascending: false })
+    .lte("rambam_date", today)
+    .order("rambam_date", { ascending: false })
     .limit(1)
     .single();
 
@@ -58,7 +59,7 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
 async function getRecentContent(): Promise<ContentRecord[]> {
   const supabase = getSupabase();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
   const { data, error } = await supabase
     .from("content")
