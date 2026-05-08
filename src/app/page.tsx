@@ -106,6 +106,7 @@ const ALIASES: Record<string, string> = {
   "fringes": "fringes", "blessings": "blessings", "circumcision": "circumcision",
   "sabbath": "sabbath", "eruvin": "eruvin", "marriage": "marriage", "divorce": "divorce",
   "forbidden foods": "forbidden-foods", "ritual slaughter": "slaughter", "repentance": "repentance",
+  "shechitah": "slaughter",
 };
 for (const [alias, id] of Object.entries(ALIASES)) { HILCHOT_TO_TREATISE[alias] = id; }
 
