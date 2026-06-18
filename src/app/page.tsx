@@ -3,8 +3,8 @@ import { books } from "@/data/books";
 import Link from "next/link";
 
 
-// Revalidate every 5 minutes so new content appears without a redeploy
-export const revalidate = 300;
+// Force dynamic rendering — no ISR cache, always fetch fresh content
+export const dynamic = "force-dynamic";
 interface ContentRecord {
   id: string;
   title: string;
@@ -22,8 +22,9 @@ interface ContentRecord {
 async function getTodaysContent(): Promise<ContentRecord | null> {
   const supabase = getSupabase();
 
-  // Today's date in YYYY-MM-DD format
+  // Today's date in YYYY-MM-DD format (Eastern time)
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const nowISO = new Date().toISOString();
 
   // First try: get content matching today's rambam_date
   const { data: todayData } = await supabase
@@ -39,28 +40,46 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
 
   if (todayData) return todayData as ContentRecord;
 
-  // Fallback: get the most recently published content
-  const { data: recentData } = await supabase
+  // Fallback: get the most recently published content on or before now
+  // Try rambam_date first, then published_at
+  const { data: byDate } = await supabase
     .from("content")
     .select(
       "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
     )
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .not("rambam_date", "is", null)
     .lte("rambam_date", today)
     .order("rambam_date", { ascending: false })
     .limit(1)
     .single();
 
-  if (recentData) return recentData as ContentRecord;
+  if (byDate) return byDate as ContentRecord;
+
+  // Last resort: most recently published by published_at
+  const { data: byPublished } = await supabase
+    .from("content")
+    .select(
+      "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
+    )
+    .eq("content_type", "dvar_torah")
+    .eq("status", "published")
+    .lte("published_at", nowISO)
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (byPublished) return byPublished as ContentRecord;
   return null;
 }
 
 async function getRecentContent(): Promise<ContentRecord[]> {
   const supabase = getSupabase();
 
-  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const nowISO = new Date().toISOString();
 
+  // Get recent content that has already been published (by published_at timestamp)
   const { data, error } = await supabase
     .from("content")
     .select(
@@ -68,8 +87,8 @@ async function getRecentContent(): Promise<ContentRecord[]> {
     )
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
-    .lte("rambam_date", today)
-    .order("rambam_date", { ascending: false })
+    .lte("published_at", nowISO)
+    .order("published_at", { ascending: false })
     .limit(7);
 
   if (error || !data) return [];
@@ -108,6 +127,8 @@ const ALIASES: Record<string, string> = {
   "sabbath": "sabbath", "eruvin": "eruvin", "marriage": "marriage", "divorce": "divorce",
   "forbidden foods": "forbidden-foods", "ritual slaughter": "slaughter", "repentance": "repentance",
   "shechitah": "slaughter",
+  "maaser": "tithes", "tithes": "tithes",
+  "maaser sheini": "second-tithes", "maaser sheni": "second-tithes", "second tithes": "second-tithes",
 };
 for (const [alias, id] of Object.entries(ALIASES)) { HILCHOT_TO_TREATISE[alias] = id; }
 
@@ -248,6 +269,19 @@ export default async function Home() {
                   Listen
                 </Link>
               )}
+              <Link
+                href={`/learn/${today.id}`}
+                className="inline-flex items-center gap-1.5 border border-slate-ink text-slate-ink text-sm font-medium px-6 py-2.5 hover:bg-ice-white transition-colors"
+                style={{ borderRadius: "980px" }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "16px" }}
+                >
+                  menu_book
+                </span>
+                Learn
+              </Link>
             </div>
           </div>
         </section>
