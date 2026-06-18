@@ -246,10 +246,10 @@ export default async function Home() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
               <Link
                 href={`/read/${today.id}`}
-                className="inline-flex items-center gap-2 bg-slate-ink text-white text-sm font-medium px-6 py-2.5 hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 bg-slate-ink text-white text-sm font-medium px-6 py-2.5 hover:opacity-90 transition-opacity whitespace-nowrap"
                 style={{ borderRadius: "980px" }}
               >
                 Read today&#39;s essay
@@ -257,7 +257,7 @@ export default async function Home() {
               {today.media_url && (
                 <Link
                   href={`/listen/${today.id}`}
-                  className="inline-flex items-center gap-1.5 border border-slate-ink text-slate-ink text-sm font-medium px-6 py-2.5 hover:bg-ice-white transition-colors"
+                  className="inline-flex items-center gap-1.5 border border-slate-ink text-slate-ink text-sm font-medium px-6 py-2.5 hover:bg-ice-white transition-colors whitespace-nowrap"
                   style={{ borderRadius: "980px" }}
                 >
                   <span
@@ -271,7 +271,7 @@ export default async function Home() {
               )}
               <Link
                 href={`/learn/${today.id}`}
-                className="inline-flex items-center gap-1.5 border border-slate-ink text-slate-ink text-sm font-medium px-6 py-2.5 hover:bg-ice-white transition-colors"
+                className="inline-flex items-center gap-1.5 border border-slate-ink text-slate-ink text-sm font-medium px-6 py-2.5 hover:bg-ice-white transition-colors whitespace-nowrap"
                 style={{ borderRadius: "980px" }}
               >
                 <span
@@ -280,7 +280,7 @@ export default async function Home() {
                 >
                   menu_book
                 </span>
-                Learn
+                One Page Summary
               </Link>
             </div>
           </div>
