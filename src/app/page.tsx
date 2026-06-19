@@ -193,177 +193,134 @@ export default async function Home() {
   const todayChapters = today ? parseChaptersFromContent(today.rambam_chapters, today.hilchot, today.sefer) : [];
 
   return (
-    <div className="min-h-screen pb-32" style={{ backgroundColor: "rgb(253, 251, 247)" }}>
+    <div className="min-h-screen pb-28" style={{ backgroundColor: "rgb(253, 251, 247)" }}>
       <Header />
 
-      <main className="max-w-[800px] mx-auto px-5 mt-8">
+      <main className="max-w-[800px] mx-auto px-5 mt-6">
         {today ? (
           <>
             {/* Date Header */}
-            <p
-              className="text-[12px] leading-[16px] font-semibold tracking-[0.1em] uppercase mb-2"
-              style={{ fontFamily: "var(--font-sans)", color: "#86868B" }}
-            >
+            <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-2" style={{ fontFamily: "var(--font-sans)" }}>
               {formatDateUpper(today.rambam_date || today.published_at)}
             </p>
 
-            {/* Hero Section */}
-            <section className="mb-12">
-              <div className="relative overflow-hidden rounded-[24px] bg-primary text-white p-8 mb-8">
-                <div className="relative z-10 max-w-[600px] mx-auto text-center py-8">
+            {/* Hero Card */}
+            <section className="mb-8">
+              <div className="relative overflow-hidden rounded-[20px] bg-primary text-white px-5 py-6 sm:px-8 sm:py-10 mb-6">
+                <div className="relative z-10 text-center">
                   <span
-                    className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.1em] uppercase mb-4"
+                    className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-semibold tracking-[0.1em] uppercase mb-3"
                     style={{ backgroundColor: "rgba(184, 134, 11, 0.2)", color: "#ffe088", fontFamily: "var(--font-sans)" }}
                   >
                     TODAY&#39;S LEARNING
                   </span>
-                  <h2
-                    className="font-serif font-bold mb-4"
-                    style={{ fontSize: "40px", lineHeight: "48px", letterSpacing: "-0.02em" }}
-                  >
+                  <h2 className="font-serif font-bold text-[26px] leading-[32px] sm:text-[36px] sm:leading-[42px] mb-2">
                     {today.title}
                   </h2>
-                  <p className="font-serif text-[24px] leading-[32px] font-semibold opacity-90 mb-8">
+                  <p className="font-serif text-[15px] leading-[22px] sm:text-[20px] sm:leading-[28px] font-semibold opacity-90 mb-4 sm:mb-6">
                     {today.rambam_chapters} | Sefer {today.sefer}
                   </p>
                   {today.hook && (
-                    <p className="text-[18px] leading-[28px] opacity-80" style={{ color: "#d1e4fb" }}>
+                    <p className="text-[14px] leading-[22px] sm:text-[16px] sm:leading-[26px] max-w-[500px] mx-auto" style={{ color: "#d1e4fb" }}>
                       {today.hook}
                     </p>
                   )}
                 </div>
               </div>
 
-              {/* Action Cards (Stacked) */}
-              <div className="space-y-4">
+              {/* Action Cards */}
+              <div className="space-y-3">
                 <Link
                   href={`/read/${today.id}`}
-                  className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
                 >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="w-10 h-10 flex items-center justify-center rounded-xl"
-                      style={{ backgroundColor: "#d1e4fb" }}
-                    >
-                      <span className="material-symbols-outlined text-primary">article</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#d1e4fb" }}>
+                      <span className="material-symbols-outlined text-primary" style={{ fontSize: "20px" }}>article</span>
                     </div>
-                    <div className="text-left">
-                      <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">
-                        Read the Essay
-                      </h3>
-                      <p className="text-[14px] leading-[20px] text-muted-gray">
-                        Deep dive into the full d&#39;var Torah
-                      </p>
+                    <div>
+                      <h3 className="text-[15px] font-semibold text-charcoal-text">Read the Essay</h3>
+                      <p className="text-[13px] text-muted-gray">Deep dive into the full d&#39;var Torah</p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                  <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
                 </Link>
 
                 {today.media_url ? (
                   <Link
                     href={`/listen/${today.id}`}
-                    className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                    className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
                   >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-10 h-10 flex items-center justify-center rounded-xl"
-                        style={{ backgroundColor: "#ffddb7" }}
-                      >
-                        <span className="material-symbols-outlined" style={{ color: "#362308" }}>
-                          headset
-                        </span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#ffddb7" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#362308" }}>headset</span>
                       </div>
-                      <div className="text-left">
-                        <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">
-                          Listen
-                        </h3>
-                        <p className="text-[14px] leading-[20px] text-muted-gray">
-                          A spoken talk on today&#39;s themes
-                        </p>
+                      <div>
+                        <h3 className="text-[15px] font-semibold text-charcoal-text">Listen</h3>
+                        <p className="text-[13px] text-muted-gray">A spoken talk on today&#39;s themes</p>
                       </div>
                     </div>
-                    <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                    <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
                   </Link>
                 ) : (
-                  <div className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border opacity-50">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-10 h-10 flex items-center justify-center rounded-xl"
-                        style={{ backgroundColor: "#ffddb7" }}
-                      >
-                        <span className="material-symbols-outlined" style={{ color: "#362308" }}>
-                          headset
-                        </span>
+                  <div className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border opacity-40">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#ffddb7" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#362308" }}>headset</span>
                       </div>
-                      <div className="text-left">
-                        <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">Listen</h3>
-                        <p className="text-[14px] leading-[20px] text-muted-gray">Coming soon</p>
+                      <div>
+                        <h3 className="text-[15px] font-semibold text-charcoal-text">Listen</h3>
+                        <p className="text-[13px] text-muted-gray">Coming soon</p>
                       </div>
                     </div>
-                    <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                    <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
                   </div>
                 )}
 
                 <Link
                   href={`/learn/${today.id}`}
-                  className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
                 >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="w-10 h-10 flex items-center justify-center rounded-xl"
-                      style={{ backgroundColor: "#ffe088" }}
-                    >
-                      <span className="material-symbols-outlined" style={{ color: "#735c00" }}>
-                        summarize
-                      </span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#ffe088" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#735c00" }}>summarize</span>
                     </div>
-                    <div className="text-left">
-                      <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">
-                        One Page Summary
-                      </h3>
-                      <p className="text-[14px] leading-[20px] text-muted-gray">
-                        A structured overview of the text
-                      </p>
+                    <div>
+                      <h3 className="text-[15px] font-semibold text-charcoal-text">One Page Summary</h3>
+                      <p className="text-[13px] text-muted-gray">A structured overview of the text</p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                  <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
                 </Link>
               </div>
             </section>
 
-            {/* Chapters Section */}
+            {/* Chapters Section -- links to study reader, Sefaria on hover */}
             {todayChapters.length > 0 && (
-              <section className="mb-12">
-                <h3
-                  className="text-[12px] leading-[16px] font-semibold tracking-[0.1em] uppercase mb-4"
-                  style={{ fontFamily: "var(--font-sans)", color: "#86868B" }}
-                >
+              <section className="mb-8">
+                <h3 className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-3" style={{ fontFamily: "var(--font-sans)" }}>
                   CHAPTERS
                 </h3>
-                <div className="bg-white rounded-[24px] border border-soft-border divide-y divide-soft-border overflow-hidden">
+                <div className="bg-white rounded-[20px] border border-soft-border divide-y divide-soft-border overflow-hidden">
                   {todayChapters.map((ch) => (
-                    <a
-                      key={`ch-${ch.treatiseId}-${ch.chapter}`}
-                      href={ch.sefariaUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between p-5 hover:bg-surface-container-low transition-colors group"
-                    >
-                      <span className="text-[16px] leading-[24px]">
-                        Chapter {ch.chapter}
-                      </span>
-                      <div className="flex items-center gap-2 text-parchment-gold opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span
-                          className="text-[14px] font-semibold tracking-[0.1em] uppercase"
-                          style={{ fontFamily: "var(--font-sans)" }}
-                        >
-                          SEFARIA
-                        </span>
-                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                          open_in_new
-                        </span>
-                      </div>
-                    </a>
+                    <div key={`ch-${ch.treatiseId}-${ch.chapter}`} className="flex items-center justify-between group">
+                      <Link
+                        href={`/study/${ch.treatiseId}/${ch.chapter}`}
+                        className="flex-1 p-4 hover:bg-surface-container-low transition-colors"
+                      >
+                        <span className="text-[15px]">Chapter {ch.chapter}</span>
+                      </Link>
+                      <a
+                        href={ch.sefariaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-parchment-gold px-4 py-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Open on Sefaria"
+                      >
+                        <span className="text-[11px] font-semibold tracking-[0.1em] uppercase" style={{ fontFamily: "var(--font-sans)" }}>SEFARIA</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>open_in_new</span>
+                      </a>
+                    </div>
                   ))}
                 </div>
               </section>
@@ -371,44 +328,33 @@ export default async function Home() {
 
             {/* Recent Section */}
             {recent.length > 1 && (
-              <section>
-                <h3
-                  className="text-[12px] leading-[16px] font-semibold tracking-[0.1em] uppercase mb-4"
-                  style={{ fontFamily: "var(--font-sans)", color: "#86868B" }}
-                >
+              <section className="mb-8">
+                <h3 className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-3" style={{ fontFamily: "var(--font-sans)" }}>
                   RECENT
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {recent.slice(1).map((item) => (
                     <Link
                       key={item.id}
                       href={`/read/${item.id}`}
-                      className="bg-white p-6 rounded-[24px] border border-soft-border ios-card-shadow group cursor-pointer hover:border-outline-variant transition-colors"
+                      className="bg-white p-5 rounded-[20px] border border-soft-border ios-card-shadow group hover:border-outline-variant transition-colors"
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className="text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-gray"
-                          style={{ fontFamily: "var(--font-sans)" }}
-                        >
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-gray" style={{ fontFamily: "var(--font-sans)" }}>
                           {formatShortDate(item.rambam_date || item.published_at)}
                         </span>
                         {item.media_url && (
                           <>
                             <span className="w-1 h-1 rounded-full bg-outline-variant" />
-                            <span
-                              className="material-symbols-outlined text-parchment-gold"
-                              style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}
-                            >
-                              play_circle
-                            </span>
+                            <span className="material-symbols-outlined text-parchment-gold" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>play_circle</span>
                           </>
                         )}
                       </div>
-                      <h4 className="font-serif text-[24px] leading-[32px] font-semibold text-primary mb-2 group-hover:text-parchment-gold transition-colors">
+                      <h4 className="font-serif text-[18px] leading-[24px] sm:text-[20px] sm:leading-[28px] font-semibold text-primary mb-1.5 group-hover:text-parchment-gold transition-colors">
                         {item.title}
                       </h4>
                       {item.hook && (
-                        <p className="text-[14px] leading-[20px] text-muted-gray line-clamp-2">
+                        <p className="text-[13px] leading-[18px] text-muted-gray line-clamp-2">
                           {item.hook}
                         </p>
                       )}
@@ -420,10 +366,10 @@ export default async function Home() {
           </>
         ) : (
           <section className="pt-12 pb-8 text-center">
-            <h1 className="font-serif text-[40px] leading-[48px] font-bold text-primary mb-4">
+            <h1 className="font-serif text-[28px] sm:text-[36px] font-bold text-primary mb-4">
               The Rambam Experience
             </h1>
-            <p className="text-[18px] leading-[28px] text-muted-gray">
+            <p className="text-[16px] text-muted-gray">
               Daily Torah insights on the Rambam&#39;s Mishneh Torah.
             </p>
           </section>
