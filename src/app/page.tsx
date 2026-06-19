@@ -1,10 +1,10 @@
 import { getSupabase } from "@/lib/supabase";
 import { books } from "@/data/books";
 import Link from "next/link";
+import Header from "@/components/Header";
 
-
-// Force dynamic rendering — no ISR cache, always fetch fresh content
 export const dynamic = "force-dynamic";
+
 interface ContentRecord {
   id: string;
   title: string;
@@ -21,17 +21,12 @@ interface ContentRecord {
 
 async function getTodaysContent(): Promise<ContentRecord | null> {
   const supabase = getSupabase();
-
-  // Today's date in YYYY-MM-DD format (Eastern time)
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const nowISO = new Date().toISOString();
 
-  // First try: get content matching today's rambam_date
   const { data: todayData } = await supabase
     .from("content")
-    .select(
-      "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
-    )
+    .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
     .eq("rambam_date", today)
@@ -40,13 +35,9 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
 
   if (todayData) return todayData as ContentRecord;
 
-  // Fallback: get the most recently published content on or before now
-  // Try rambam_date first, then published_at
   const { data: byDate } = await supabase
     .from("content")
-    .select(
-      "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
-    )
+    .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
     .not("rambam_date", "is", null)
@@ -57,12 +48,9 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
 
   if (byDate) return byDate as ContentRecord;
 
-  // Last resort: most recently published by published_at
   const { data: byPublished } = await supabase
     .from("content")
-    .select(
-      "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
-    )
+    .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
     .lte("published_at", nowISO)
@@ -76,15 +64,11 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
 
 async function getRecentContent(): Promise<ContentRecord[]> {
   const supabase = getSupabase();
-
   const nowISO = new Date().toISOString();
 
-  // Get recent content that has already been published (by published_at timestamp)
   const { data, error } = await supabase
     .from("content")
-    .select(
-      "id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body"
-    )
+    .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
     .lte("published_at", nowISO)
@@ -110,6 +94,8 @@ function formatShortDate(dateStr: string) {
   });
 }
 
+/* ── Treatise mappings ── */
+
 const HILCHOT_TO_TREATISE: Record<string, string> = {};
 for (const book of books) {
   for (const t of book.treatises) {
@@ -132,13 +118,46 @@ const ALIASES: Record<string, string> = {
 };
 for (const [alias, id] of Object.entries(ALIASES)) { HILCHOT_TO_TREATISE[alias] = id; }
 
-interface ParsedChapter { treatiseId: string; treatiseName: string; chapter: number; bookEng: string; }
+/* Sefaria URL names for Mishneh Torah treatises */
+const SEFARIA_NAMES: Record<string, string> = {
+  "foundations": "Foundations_of_the_Torah",
+  "dispositions": "Human_Dispositions",
+  "torah-study": "Torah_Study",
+  "foreign-worship": "Foreign_Worship_and_Customs_of_the_Nations",
+  "repentance": "Repentance",
+  "shema": "Reading_the_Shema",
+  "prayer": "Prayer_and_the_Priestly_Blessing",
+  "tefillin": "Tefillin%2C_Mezuzah_and_the_Torah_Scroll",
+  "fringes": "Fringes",
+  "blessings": "Blessings",
+  "circumcision": "Circumcision",
+  "sabbath": "Sabbath",
+  "eruvin": "Eruvin",
+  "shofar": "Shofar%2C_Sukkah_and_Lulav",
+  "chametz": "Leavened_and_Unleavened_Bread",
+  "marriage": "Marriage",
+  "divorce": "Divorce",
+  "intercourse": "Forbidden_Intercourse",
+  "forbidden-foods": "Forbidden_Foods",
+  "slaughter": "Ritual_Slaughter",
+  "tithes": "Tithes",
+  "second-tithes": "Second_Tithes",
+  "sotah": "Sotah",
+};
+
+interface ParsedChapter {
+  treatiseId: string;
+  treatiseName: string;
+  chapter: number;
+  bookEng: string;
+  sefariaUrl: string;
+}
 
 function parseChaptersFromContent(rambamChapters: string, hilchot: string, sefer: string): ParsedChapter[] {
   const chapters: ParsedChapter[] = [];
   const parts = rambamChapters.split(",").map(s => s.trim());
   for (const part of parts) {
-    const match = part.match(/^(.+?)\s+([\d]+(?:\s*[-\u2013]\s*[\d]+)?)$/);
+    const match = part.match(/^(.+?)\s+([\d]+(?:\s*[-–]\s*[\d]+)?)$/);
     if (!match) continue;
     const treatiseName = match[1].trim();
     const chapterStr = match[2].trim();
@@ -151,13 +170,16 @@ function parseChaptersFromContent(rambamChapters: string, hilchot: string, sefer
         if (t.id === treatiseId) { displayName = t.name; bookEng = book.eng; break; }
       }
     }
-    const rangeParts = chapterStr.split(/[-\u2013]/).map(s => parseInt(s.trim()));
+    const sefariaName = SEFARIA_NAMES[treatiseId] || treatiseName.replace(/\s+/g, "_");
+    const rangeParts = chapterStr.split(/[-–]/).map(s => parseInt(s.trim()));
     if (rangeParts.length === 2) {
       for (let ch = rangeParts[0]; ch <= rangeParts[1]; ch++) {
-        chapters.push({ treatiseId, treatiseName: displayName, chapter: ch, bookEng });
+        const sefariaUrl = `https://www.sefaria.org/Mishneh_Torah%2C_${sefariaName}.${ch}?lang=bi`;
+        chapters.push({ treatiseId, treatiseName: displayName, chapter: ch, bookEng, sefariaUrl });
       }
     } else if (rangeParts.length === 1 && !isNaN(rangeParts[0])) {
-      chapters.push({ treatiseId, treatiseName: displayName, chapter: rangeParts[0], bookEng });
+      const sefariaUrl = `https://www.sefaria.org/Mishneh_Torah%2C_${sefariaName}.${rangeParts[0]}?lang=bi`;
+      chapters.push({ treatiseId, treatiseName: displayName, chapter: rangeParts[0], bookEng, sefariaUrl });
     }
   }
   return chapters;
@@ -171,120 +193,166 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header — solid white, no transparency */}
-      <header className="sticky top-0 z-50 bg-white border-b border-cloud-gray">
-        <div className="max-w-[980px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 40 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="flex-shrink-0"
-            >
-              <path d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z" fill="#334155" />
-              <path d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z" fill="#334155" opacity="0.7" />
-              <path d="M18 6H22V34H18V6Z" fill="#334155" opacity="0.4" />
-              <line x1="11" y1="12" x2="16" y2="12" stroke="white" strokeWidth="1.2" />
-              <line x1="11" y1="16" x2="15" y2="16" stroke="white" strokeWidth="1.2" />
-              <line x1="24" y1="12" x2="29" y2="12" stroke="white" strokeWidth="1.2" opacity="0.8" />
-              <line x1="24" y1="16" x2="28" y2="16" stroke="white" strokeWidth="1.2" opacity="0.8" />
-            </svg>
-            <div className="flex items-baseline gap-1">
-              <span className="font-serif text-base font-semibold text-slate-ink leading-none">
-                The Rambam
-              </span>
-              <span
-                className="text-[8px] font-semibold tracking-[2px] text-oxide-red leading-none hidden sm:inline"
-                style={{ fontFamily: "var(--font-sans)" }}
-              >
-                EXPERIENCE
-              </span>
-            </div>
-          </div>
+      <Header />
 
-          {/* Nav */}
-          <nav className="flex items-center gap-6">
-            <span className="text-sm font-medium text-slate-ink">Today</span>
-            <Link
-              href="/library"
-              className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors"
-            >
-              Library
-            </Link>
-            <a
-              href="/archive"
-              className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors"
-            >
-              Archive
-            </a>
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero */}
       {today ? (
-        <section className="pt-10 sm:pt-16 pb-6 sm:pb-10 px-4 sm:px-6">
-          <div className="max-w-[680px] mx-auto text-center">
-            <p className="text-[10px] sm:text-xs font-semibold tracking-[2px] sm:tracking-[3px] uppercase text-oxide-red mb-3 sm:mb-5">
-              {formatDate(today.rambam_date || today.published_at)}
-            </p>
+        <>
+          {/* ── Hero ── */}
+          <section className="pt-8 sm:pt-14 pb-4 sm:pb-6 px-4 sm:px-6">
+            <div className="max-w-[680px] mx-auto text-center">
+              <p className="text-[10px] sm:text-xs font-semibold tracking-[2px] sm:tracking-[3px] uppercase text-oxide-red mb-3 sm:mb-4">
+                {formatDate(today.rambam_date || today.published_at)}
+              </p>
+              <h1 className="font-serif text-[24px] sm:text-[40px] font-semibold text-slate-ink leading-[1.15] mb-2 sm:mb-3">
+                {today.title}
+              </h1>
+              <p className="text-blue-slate text-sm">
+                {today.rambam_chapters}
+                <span className="mx-2 text-cloud-gray">|</span>
+                Sefer {today.sefer}
+              </p>
+            </div>
+          </section>
 
-            <h1 className="font-serif text-[26px] sm:text-[44px] font-semibold text-slate-ink leading-[1.15] mb-3 sm:mb-5">
-              {today.title}
-            </h1>
+          {/* ── Hook quote ── */}
+          {today.hook && (
+            <section className="pb-6 sm:pb-8 px-4 sm:px-6">
+              <div className="max-w-[480px] mx-auto text-center">
+                <div className="w-10 h-px bg-cloud-gray mx-auto mb-4" />
+                <p className="font-serif text-[13px] sm:text-[15px] text-blue-slate italic leading-relaxed">
+                  {today.hook}
+                </p>
+                <div className="w-10 h-px bg-cloud-gray mx-auto mt-4" />
+              </div>
+            </section>
+          )}
 
-            <p className="text-blue-slate text-sm mb-1">
-              {today.rambam_chapters}
-              <span className="mx-2 text-cloud-gray">|</span>
-              Sefer {today.sefer}
-            </p>
-            <p className="text-light-slate text-xs mb-5 sm:mb-7">
-              {today.hilchot}
-            </p>
+          {/* ── Today's Chapters ── */}
+          {todayChapters.length > 0 && (
+            <section className="pb-4 sm:pb-6 px-4 sm:px-6">
+              <div className="max-w-[680px] mx-auto">
+                <h2 className="text-[10px] sm:text-xs font-semibold tracking-[2px] uppercase text-light-slate mb-3 text-center">
+                  Today&#39;s chapters
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {todayChapters.map((ch) => (
+                    <Link
+                      key={`${ch.treatiseId}-${ch.chapter}`}
+                      href={`/study/${ch.treatiseId}/${ch.chapter}`}
+                      className="bg-ice-white rounded-xl px-4 py-3.5 hover:bg-cloud-gray/60 transition-colors group"
+                    >
+                      <p className="text-sm font-medium text-slate-ink group-hover:text-oxide-red transition-colors">
+                        {ch.treatiseName}
+                      </p>
+                      <p className="text-xs text-light-slate mt-0.5">
+                        Chapter {ch.chapter}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+          {/* ── Content sections ── */}
+          <section className="pb-4 sm:pb-6 px-4 sm:px-6">
+            <div className="max-w-[680px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Read the essay */}
               <Link
                 href={`/read/${today.id}`}
-                className="inline-flex items-center gap-2 bg-slate-ink text-white text-sm font-medium px-6 py-2.5 hover:opacity-90 transition-opacity whitespace-nowrap"
-                style={{ borderRadius: "980px" }}
-              >
-                Read today&#39;s essay
-              </Link>
-              {today.media_url && (
-                <Link
-                  href={`/listen/${today.id}`}
-                  className="inline-flex items-center gap-1.5 border border-slate-ink text-slate-ink text-sm font-medium px-6 py-2.5 hover:bg-ice-white transition-colors whitespace-nowrap"
-                  style={{ borderRadius: "980px" }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}
-                  >
-                    play_arrow
-                  </span>
-                  Listen
-                </Link>
-              )}
-              <Link
-                href={`/learn/${today.id}`}
-                className="inline-flex items-center gap-1.5 border border-slate-ink text-slate-ink text-sm font-medium px-6 py-2.5 hover:bg-ice-white transition-colors whitespace-nowrap"
-                style={{ borderRadius: "980px" }}
+                className="bg-slate-ink rounded-xl px-5 py-5 group hover:opacity-95 transition-opacity"
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: "16px" }}
+                  className="material-symbols-outlined text-white/60 mb-3 block"
+                  style={{ fontSize: "24px" }}
+                >
+                  article
+                </span>
+                <p className="text-white text-sm font-semibold mb-1">Read the essay</p>
+                <p className="text-white/60 text-xs leading-relaxed">
+                  Full d&#39;var Torah on today&#39;s chapters
+                </p>
+              </Link>
+
+              {/* Listen */}
+              {today.media_url ? (
+                <Link
+                  href={`/listen/${today.id}`}
+                  className="bg-ice-white rounded-xl px-5 py-5 group hover:bg-cloud-gray/60 transition-colors"
+                >
+                  <span
+                    className="material-symbols-outlined text-slate-ink/40 mb-3 block"
+                    style={{ fontSize: "24px", fontVariationSettings: "'FILL' 1" }}
+                  >
+                    play_circle
+                  </span>
+                  <p className="text-slate-ink text-sm font-semibold mb-1">Listen</p>
+                  <p className="text-blue-slate text-xs leading-relaxed">
+                    Spoken talk on today&#39;s learning
+                  </p>
+                </Link>
+              ) : (
+                <div className="bg-ice-white rounded-xl px-5 py-5 opacity-50">
+                  <span
+                    className="material-symbols-outlined text-slate-ink/30 mb-3 block"
+                    style={{ fontSize: "24px", fontVariationSettings: "'FILL' 1" }}
+                  >
+                    play_circle
+                  </span>
+                  <p className="text-slate-ink text-sm font-semibold mb-1">Listen</p>
+                  <p className="text-blue-slate text-xs leading-relaxed">Coming soon</p>
+                </div>
+              )}
+
+              {/* One Page Summary */}
+              <Link
+                href={`/learn/${today.id}`}
+                className="bg-ice-white rounded-xl px-5 py-5 group hover:bg-cloud-gray/60 transition-colors"
+              >
+                <span
+                  className="material-symbols-outlined text-slate-ink/40 mb-3 block"
+                  style={{ fontSize: "24px" }}
                 >
                   menu_book
                 </span>
-                One Page Summary
+                <p className="text-slate-ink text-sm font-semibold mb-1">One Page Summary</p>
+                <p className="text-blue-slate text-xs leading-relaxed">
+                  Structured overview of all three chapters
+                </p>
               </Link>
             </div>
-          </div>
-        </section>
+          </section>
+
+          {/* ── Source texts on Sefaria ── */}
+          {todayChapters.length > 0 && (
+            <section className="pb-6 sm:pb-8 px-4 sm:px-6">
+              <div className="max-w-[680px] mx-auto">
+                <h2 className="text-[10px] sm:text-xs font-semibold tracking-[2px] uppercase text-light-slate mb-3 text-center">
+                  Source texts on Sefaria
+                </h2>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {todayChapters.map((ch) => (
+                    <a
+                      key={`sefaria-${ch.treatiseId}-${ch.chapter}`}
+                      href={ch.sefariaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 border border-cloud-gray text-blue-slate text-xs font-medium px-3.5 py-2 rounded-lg hover:border-slate-ink hover:text-slate-ink transition-colors"
+                    >
+                      {ch.treatiseName} {ch.chapter}
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "13px" }}
+                      >
+                        open_in_new
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+        </>
       ) : (
         <section className="pt-12 pb-8 px-4">
           <div className="max-w-[680px] mx-auto text-center">
@@ -298,58 +366,14 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Hook Quote */}
-      {today?.hook && (
-        <section className="pb-6 sm:pb-10 px-4 sm:px-6">
-          <div className="max-w-[480px] mx-auto text-center">
-            <div className="w-10 h-px bg-cloud-gray mx-auto mb-4" />
-            <p className="font-serif text-[14px] sm:text-base text-blue-slate italic leading-relaxed">
-              {today.hook}
-            </p>
-            <div className="w-10 h-px bg-cloud-gray mx-auto mt-4" />
-          </div>
-        </section>
-      )}
+      {/* ── Divider ── */}
+      <div className="max-w-[680px] mx-auto px-4 sm:px-6">
+        <div className="h-px bg-cloud-gray" />
+      </div>
 
-      {todayChapters.length > 0 && (
-      <section className="pb-6 sm:pb-10 px-4 sm:px-6">
-        <div className="max-w-[480px] mx-auto">
-          <h2 className="font-serif text-lg font-semibold text-slate-ink mb-3 text-center">
-            Today&#39;s chapters
-          </h2>
-          <div className="bg-ice-white rounded-xl overflow-hidden">
-            {todayChapters.map((ch, i, arr) => (
-              <Link
-                key={`${ch.treatiseId}-${ch.chapter}`}
-                href={`/study/${ch.treatiseId}/${ch.chapter}`}
-                className={`flex items-center justify-between px-4 py-3 hover:bg-cloud-gray/40 transition-colors ${
-                  i < arr.length - 1 ? "border-b border-cloud-gray" : ""
-                }`}
-              >
-                <div>
-                  <p className="text-sm font-medium text-slate-ink">
-                    {ch.treatiseName}, Chapter {ch.chapter}
-                  </p>
-                  <p className="text-[11px] text-light-slate mt-0.5">
-                    Sefer {ch.bookEng}
-                  </p>
-                </div>
-                <span
-                  className="material-symbols-outlined text-light-slate"
-                  style={{ fontSize: "16px" }}
-                >
-                  chevron_right
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-      )}
-
-      {/* Archive */}
+      {/* ── Recent ── */}
       {recent.length > 1 && (
-        <section id="archive" className="pb-8 sm:pb-12 px-4 sm:px-6">
+        <section className="py-6 sm:py-10 px-4 sm:px-6">
           <div className="max-w-[680px] mx-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-serif text-lg font-semibold text-slate-ink">
@@ -409,7 +433,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Footer */}
+      {/* ── Footer ── */}
       <footer className="border-t border-cloud-gray py-6 px-4">
         <div className="max-w-[980px] mx-auto text-center">
           <p className="text-xs text-light-slate">The Rambam Experience</p>
