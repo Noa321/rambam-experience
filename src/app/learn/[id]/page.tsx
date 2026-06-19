@@ -76,11 +76,26 @@ export default async function LearnPage({
     const res = await fetch(learnUrl, { next: { revalidate: 0 } });
     if (res.ok) {
       const fullHtml = await res.text();
-      const styleMatch = fullHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
       const bodyMatch = fullHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      const styleTag = styleMatch ? `<style>${styleMatch[1]}</style>` : "";
-      const bodyContent = bodyMatch ? bodyMatch[1] : fullHtml;
-      learnHtml = styleTag + bodyContent;
+      let bodyContent = bodyMatch ? bodyMatch[1] : fullHtml;
+
+      // Re-skin the stored document to the app palette/fonts. The learn HTML
+      // ships with its own slate + brick-red / Inter styling; we drop its
+      // <style> (the app provides .learn-doc styles instead) and remap the
+      // colors and Hebrew font that are hard-coded inside the inline SVG diagram.
+      const REMAP: Record<string, string> = {
+        "#334155": "#162839", "#7A3E3E": "#B8860B", "#4A6274": "#735C00",
+        "#64748B": "#86868B", "#94A3B8": "#A9A9AE", "#E5E7EB": "#E5E5E7",
+        "#F1F5F9": "#F3F3F5", "#F4F7FA": "#F3F3F5", "#FDF6F4": "#F7F1E6",
+        "#3D6B50": "#735C00", "#F0F7F3": "#F7F1E6",
+      };
+      for (const [oldC, newC] of Object.entries(REMAP)) {
+        bodyContent = bodyContent.split(oldC).join(newC);
+        bodyContent = bodyContent.split(oldC.toLowerCase()).join(newC);
+      }
+      bodyContent = bodyContent.split("Frank Ruhl Libre").join("Noto Serif Hebrew");
+
+      learnHtml = bodyContent;
     }
   } catch {
     /* Storage file not found */
@@ -136,7 +151,7 @@ export default async function LearnPage({
       </header>
 
       {/* One-Page Learn content */}
-      <div dangerouslySetInnerHTML={{ __html: learnHtml }} />
+      <div className="learn-doc" dangerouslySetInnerHTML={{ __html: learnHtml }} />
 
       {/* Continue with today's learning */}
       <div className="max-w-[680px] mx-auto px-5 pb-6 -mt-2">

@@ -198,3 +198,167 @@ h1, h2, h3, h4 {
 .sefaria-text-he sup.footnote-marker {
   display: none;
 }
+
+/* ── One-Page Learn document — re-skinned to match the app ── */
+.learn-doc {
+  /* Old token names remapped to the app palette so any var() refs resolve on-brand */
+  --slate-ink: #162839;
+  --blue-slate: #86868B;
+  --oxide-red: #B8860B;
+  --ice-white: #F3F3F5;
+  --cloud-gray: #E5E5E7;
+  --pure-white: #FFFFFF;
+  --light-slate: #A9A9AE;
+  --ch1-color: #B8860B;
+  --ch2-color: #735C00;
+  --ch3-color: #162839;
+  --live-green: #735C00;
+  --live-green-bg: #F7F1E6;
+  --hist-color: #86868B;
+  --hist-bg: #F3F3F5;
+
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 20px 8px;
+  font-family: var(--font-serif);
+  color: #1D1D1F;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.learn-doc * { box-sizing: border-box; }
+
+/* Neutralize the old white "page" card so content flows on the app background */
+.learn-doc .page {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+.learn-doc .cover { text-align: center; margin-bottom: 28px; }
+.learn-doc .kicker {
+  font-family: var(--font-sans);
+  font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--oxide-red); margin-bottom: 14px;
+}
+.learn-doc .cover .he, .learn-doc .he {
+  font-family: var(--font-hebrew);
+  font-size: 30px; font-weight: 700; color: var(--slate-ink);
+  direction: rtl; margin-bottom: 10px; line-height: 1.4;
+}
+.learn-doc .subtitle {
+  font-family: var(--font-serif);
+  font-size: 18px; color: var(--blue-slate); font-weight: 400;
+  margin-bottom: 14px; line-height: 1.5;
+}
+.learn-doc .meta {
+  display: inline-block; font-family: var(--font-sans);
+  font-size: 11px; font-weight: 500; letter-spacing: 0.5px;
+  color: var(--blue-slate); background: var(--ice-white);
+  padding: 6px 16px; border-radius: 980px; border: 1px solid var(--cloud-gray);
+}
+
+.learn-doc .lede {
+  background: var(--ice-white); border-radius: 10px; padding: 16px 18px;
+  font-size: 15px; color: var(--blue-slate); margin: 0 0 28px; line-height: 1.65;
+}
+.learn-doc .lede strong { color: var(--slate-ink); font-weight: 600; }
+
+.learn-doc h2 {
+  font-family: var(--font-serif); font-size: 20px; font-weight: 600;
+  color: var(--slate-ink); margin: 32px 0 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.learn-doc .tab {
+  display: inline-block; font-family: var(--font-sans);
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 5px; color: #fff; flex-shrink: 0;
+}
+.learn-doc .tab-frame { background: var(--slate-ink); }
+.learn-doc .tab-ch1 { background: var(--ch1-color); }
+.learn-doc .tab-ch2 { background: var(--ch2-color); }
+.learn-doc .tab-ch3 { background: var(--ch3-color); }
+.learn-doc .tab-today { background: var(--oxide-red); }
+
+.learn-doc .frame-text {
+  font-size: 1.0625rem; color: var(--slate-ink); line-height: 1.75; margin-bottom: 22px;
+}
+
+.learn-doc .figure { margin: 24px 0 28px; text-align: center; }
+.learn-doc .figure svg { max-width: 100%; height: auto; }
+.learn-doc .figure figcaption {
+  font-family: var(--font-sans); font-size: 12px; color: var(--light-slate);
+  margin-top: 10px; font-weight: 500; letter-spacing: 0.5px;
+}
+
+.learn-doc .spine-list { list-style: none; padding: 0; margin: 0 0 8px; }
+.learn-doc .spine-list li {
+  position: relative; padding: 6px 0 6px 20px;
+  font-size: 15px; line-height: 1.65; color: var(--slate-ink);
+}
+.learn-doc .spine-list li::before {
+  content: ''; position: absolute; left: 0; top: 14px;
+  width: 6px; height: 6px; border-radius: 50%;
+}
+.learn-doc .spine-list.ch1 li::before { background: var(--ch1-color); }
+.learn-doc .spine-list.ch2 li::before { background: var(--ch2-color); }
+.learn-doc .spine-list.ch3 li::before { background: var(--ch3-color); }
+.learn-doc .spine-list li strong { font-weight: 600; color: var(--slate-ink); }
+
+.learn-doc .he-inline {
+  font-family: var(--font-hebrew); direction: rtl; unicode-bidi: isolate; font-weight: 500;
+}
+
+.learn-doc .box { border-radius: 10px; padding: 18px 20px; margin: 20px 0; font-size: 15px; line-height: 1.7; }
+.learn-doc .box-title {
+  display: block; font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+}
+.learn-doc .box.spark { background: #F7F1E6; border-left: 3px solid var(--oxide-red); }
+.learn-doc .box.spark .box-title { color: var(--oxide-red); }
+.learn-doc .box.chas { background: var(--ice-white); border-left: 3px solid var(--ch2-color); }
+.learn-doc .box.chas .box-title { color: var(--ch2-color); }
+.learn-doc .box.society { background: var(--ice-white); border-left: 3px solid var(--slate-ink); }
+.learn-doc .box.society .box-title { color: var(--slate-ink); }
+.learn-doc .box.practical { background: var(--ice-white); border-left: 3px solid var(--oxide-red); }
+.learn-doc .box.practical .box-title { color: var(--oxide-red); }
+.learn-doc .box.practical strong {
+  display: block; font-family: var(--font-serif); font-size: 17px; font-weight: 600;
+  color: var(--slate-ink); margin-bottom: 6px; line-height: 1.4;
+}
+.learn-doc .box.warn {
+  background: var(--ice-white); border-left: 3px solid var(--light-slate);
+  color: var(--blue-slate); font-size: 14px;
+}
+.learn-doc .box.warn .box-title { color: var(--light-slate); }
+
+.learn-doc .band { display: flex; gap: 16px; margin: 16px 0 24px; }
+.learn-doc .col { flex: 1; border-radius: 10px; padding: 16px 18px; }
+.learn-doc .col h4 {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;
+}
+.learn-doc .col ul { list-style: none; padding: 0; margin: 0; }
+.learn-doc .col li { font-size: 14px; line-height: 1.6; padding: 3px 0 3px 14px; position: relative; }
+.learn-doc .col li::before {
+  content: ''; position: absolute; left: 0; top: 10px;
+  width: 5px; height: 5px; border-radius: 50%;
+}
+.learn-doc .col.live { background: var(--live-green-bg); }
+.learn-doc .col.live h4 { color: var(--live-green); }
+.learn-doc .col.live li::before { background: var(--live-green); }
+.learn-doc .col.hist { background: var(--hist-bg); }
+.learn-doc .col.hist h4 { color: var(--hist-color); }
+.learn-doc .col.hist li::before { background: var(--hist-color); }
+
+.learn-doc .endmark { text-align: center; color: var(--cloud-gray); font-size: 14px; letter-spacing: 8px; margin: 32px 0 12px; }
+.learn-doc .sources { font-family: var(--font-sans); text-align: center; font-size: 12px; color: var(--light-slate); line-height: 1.6; }
+
+@media (max-width: 640px) {
+  .learn-doc .cover .he, .learn-doc .he { font-size: 26px; }
+  .learn-doc .band { flex-direction: column; }
+  .learn-doc h2 { font-size: 18px; }
+}
