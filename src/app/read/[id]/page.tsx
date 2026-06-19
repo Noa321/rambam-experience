@@ -72,6 +72,41 @@ export default async function ReadPage({
     day: "numeric",
   });
 
+  // The essay body is pipeline-generated HTML that ships with its own embedded
+  // <style> and document chrome (header/title-block/metadata/footer) in a legacy
+  // palette/font. Strip the <style>, keep just the <article> content (the app
+  // renders its own title/header), and remap any legacy colors/fonts so the
+  // app's .prose-rambam styles govern and the essay matches the rest of the app.
+  let essayHtml = content.body || "";
+  if (content.body_format === "html") {
+    essayHtml = essayHtml
+      .replace(/<style[\s\S]*?<\/style>/gi, "")
+      .replace(/<title[\s\S]*?<\/title>/gi, "")
+      .replace(/<(?:meta|link|base)\b[^>]*\/?>/gi, "");
+    const articleMatch = essayHtml.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+    if (articleMatch) essayHtml = articleMatch[1];
+    const REMAP: Record<string, string> = {
+      "#334155": "#162839", "#2C3E50": "#162839", "#2A2A28": "#1D1D1F",
+      "#7A3E3E": "#B8860B", "#C0392B": "#B8860B", "#A93226": "#735C00",
+      "#64748B": "#86868B", "#5A5A56": "#86868B", "#718096": "#86868B",
+      "#94A3B8": "#A9A9AE", "#E5E7EB": "#E5E5E7", "#E2E2E2": "#E5E5E7",
+      "#F1F5F9": "#F3F3F5", "#F8FAFC": "#F3F3F5", "#FFF5F5": "#F7F1E6",
+      "#FAFAF8": "#FDFBF7",
+    };
+    for (const [oldC, newC] of Object.entries(REMAP)) {
+      essayHtml = essayHtml.split(oldC).join(newC);
+      essayHtml = essayHtml.split(oldC.toLowerCase()).join(newC);
+    }
+    essayHtml = essayHtml
+      .split("Frank Ruhl Libre").join("Source Serif 4")
+      .split("Literata").join("Source Serif 4")
+      .split("DM Sans").join("Inter");
+
+    // Drop a leading em-dash dateline some legacy essays prefix (redundant with
+    // the app's own title header).
+    essayHtml = essayHtml.replace(/<p[^>]*>\s*[—–][^<]*<\/p>\s*/i, "");
+  }
+
   return (
     <div className="min-h-screen pb-28">
       {/* Header */}
@@ -128,7 +163,7 @@ export default async function ReadPage({
         {content.body_format === "html" ? (
           <div
             className="prose-rambam"
-            dangerouslySetInnerHTML={{ __html: content.body }}
+            dangerouslySetInnerHTML={{ __html: essayHtml }}
           />
         ) : (
           <div className="font-serif text-base text-primary leading-[1.75] whitespace-pre-wrap">

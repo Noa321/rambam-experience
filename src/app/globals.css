@@ -124,9 +124,15 @@ h1, h2, h3, h4 {
 .prose-rambam .pull-quote {
   font-style: italic;
   color: #86868B;
-  border-left: 2px solid #E5E5E7;
+  border-left: 3px solid #B8860B;
   padding-left: 1.25em;
   margin: 1.5em 0;
+}
+
+.prose-rambam .section-divider {
+  border: none;
+  border-top: 1px solid #E5E5E7;
+  margin: 2em 0 1em;
 }
 
 .prose-rambam .card {
@@ -140,11 +146,27 @@ h1, h2, h3, h4 {
   font-weight: 600;
 }
 
-/* Override any inline styles from the HTML template */
+/* Hide the essay HTML template's own chrome — the app renders its own header/title */
 .prose-rambam .title-block,
+.prose-rambam .article-header,
+.prose-rambam .metadata,
+.prose-rambam .meta,
+.prose-rambam .subtitle,
+.prose-rambam .site-title,
+.prose-rambam .header,
+.prose-rambam .header-text,
+.prose-rambam .brand-name,
+.prose-rambam .brand-sub,
 .prose-rambam header,
 .prose-rambam footer {
   display: none;
+}
+
+.prose-rambam .container,
+.prose-rambam .content {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Sefaria text styling for the study reader */
