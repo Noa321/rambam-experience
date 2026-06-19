@@ -2,6 +2,7 @@ import { getSupabase } from "@/lib/supabase";
 import { books } from "@/data/books";
 import Link from "next/link";
 import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
 
 export const dynamic = "force-dynamic";
 
@@ -79,19 +80,19 @@ async function getRecentContent(): Promise<ContentRecord[]> {
   return data as ContentRecord[];
 }
 
-function formatDate(dateStr: string) {
+function formatDateUpper(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
-  });
+  }).toUpperCase();
 }
 
 function formatShortDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-  });
+  }).toUpperCase();
 }
 
 /* ── Treatise mappings ── */
@@ -192,253 +193,244 @@ export default async function Home() {
   const todayChapters = today ? parseChaptersFromContent(today.rambam_chapters, today.hilchot, today.sefer) : [];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen pb-32" style={{ backgroundColor: "rgb(253, 251, 247)" }}>
       <Header />
 
-      {today ? (
-        <>
-          {/* ── Hero ── */}
-          <section className="pt-8 sm:pt-14 pb-4 sm:pb-6 px-4 sm:px-6">
-            <div className="max-w-[680px] mx-auto text-center">
-              <p className="text-[10px] sm:text-xs font-semibold tracking-[2px] sm:tracking-[3px] uppercase text-oxide-red mb-3 sm:mb-4">
-                {formatDate(today.rambam_date || today.published_at)}
-              </p>
-              <h1 className="font-serif text-[24px] sm:text-[40px] font-semibold text-slate-ink leading-[1.15] mb-2 sm:mb-3">
-                {today.title}
-              </h1>
-              <p className="text-blue-slate text-sm">
-                {today.rambam_chapters}
-                <span className="mx-2 text-cloud-gray">|</span>
-                Sefer {today.sefer}
-              </p>
-            </div>
-          </section>
+      <main className="max-w-[800px] mx-auto px-5 mt-8">
+        {today ? (
+          <>
+            {/* Date Header */}
+            <p
+              className="text-[12px] leading-[16px] font-semibold tracking-[0.1em] uppercase mb-2"
+              style={{ fontFamily: "var(--font-sans)", color: "#86868B" }}
+            >
+              {formatDateUpper(today.rambam_date || today.published_at)}
+            </p>
 
-          {/* ── Hook quote ── */}
-          {today.hook && (
-            <section className="pb-6 sm:pb-8 px-4 sm:px-6">
-              <div className="max-w-[480px] mx-auto text-center">
-                <div className="w-10 h-px bg-cloud-gray mx-auto mb-4" />
-                <p className="font-serif text-[13px] sm:text-[15px] text-blue-slate italic leading-relaxed">
-                  {today.hook}
-                </p>
-                <div className="w-10 h-px bg-cloud-gray mx-auto mt-4" />
-              </div>
-            </section>
-          )}
-
-          {/* ── Today's Chapters ── */}
-          {todayChapters.length > 0 && (
-            <section className="pb-4 sm:pb-6 px-4 sm:px-6">
-              <div className="max-w-[680px] mx-auto">
-                <h2 className="text-[10px] sm:text-xs font-semibold tracking-[2px] uppercase text-light-slate mb-3 text-center">
-                  Today&#39;s chapters
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {todayChapters.map((ch) => (
-                    <Link
-                      key={`${ch.treatiseId}-${ch.chapter}`}
-                      href={`/study/${ch.treatiseId}/${ch.chapter}`}
-                      className="bg-ice-white rounded-xl px-4 py-3.5 hover:bg-cloud-gray/60 transition-colors group"
-                    >
-                      <p className="text-sm font-medium text-slate-ink group-hover:text-oxide-red transition-colors">
-                        {ch.treatiseName}
-                      </p>
-                      <p className="text-xs text-light-slate mt-0.5">
-                        Chapter {ch.chapter}
-                      </p>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* ── Content sections ── */}
-          <section className="pb-4 sm:pb-6 px-4 sm:px-6">
-            <div className="max-w-[680px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Read the essay */}
-              <Link
-                href={`/read/${today.id}`}
-                className="bg-slate-ink rounded-xl px-5 py-5 group hover:opacity-95 transition-opacity"
-              >
-                <span
-                  className="material-symbols-outlined text-white/60 mb-3 block"
-                  style={{ fontSize: "24px" }}
-                >
-                  article
-                </span>
-                <p className="text-white text-sm font-semibold mb-1">Read the essay</p>
-                <p className="text-white/60 text-xs leading-relaxed">
-                  Full d&#39;var Torah on today&#39;s chapters
-                </p>
-              </Link>
-
-              {/* Listen */}
-              {today.media_url ? (
-                <Link
-                  href={`/listen/${today.id}`}
-                  className="bg-ice-white rounded-xl px-5 py-5 group hover:bg-cloud-gray/60 transition-colors"
-                >
+            {/* Hero Section */}
+            <section className="mb-12">
+              <div className="relative overflow-hidden rounded-[24px] bg-primary text-white p-8 mb-8">
+                <div className="relative z-10 max-w-[600px] mx-auto text-center py-8">
                   <span
-                    className="material-symbols-outlined text-slate-ink/40 mb-3 block"
-                    style={{ fontSize: "24px", fontVariationSettings: "'FILL' 1" }}
+                    className="inline-block px-3 py-1 rounded-full text-[10px] font-semibold tracking-[0.1em] uppercase mb-4"
+                    style={{ backgroundColor: "rgba(184, 134, 11, 0.2)", color: "#ffe088", fontFamily: "var(--font-sans)" }}
                   >
-                    play_circle
+                    TODAY&#39;S LEARNING
                   </span>
-                  <p className="text-slate-ink text-sm font-semibold mb-1">Listen</p>
-                  <p className="text-blue-slate text-xs leading-relaxed">
-                    Spoken talk on today&#39;s learning
+                  <h2
+                    className="font-serif font-bold mb-4"
+                    style={{ fontSize: "40px", lineHeight: "48px", letterSpacing: "-0.02em" }}
+                  >
+                    {today.title}
+                  </h2>
+                  <p className="font-serif text-[24px] leading-[32px] font-semibold opacity-90 mb-8">
+                    {today.rambam_chapters} | Sefer {today.sefer}
                   </p>
-                </Link>
-              ) : (
-                <div className="bg-ice-white rounded-xl px-5 py-5 opacity-50">
-                  <span
-                    className="material-symbols-outlined text-slate-ink/30 mb-3 block"
-                    style={{ fontSize: "24px", fontVariationSettings: "'FILL' 1" }}
-                  >
-                    play_circle
-                  </span>
-                  <p className="text-slate-ink text-sm font-semibold mb-1">Listen</p>
-                  <p className="text-blue-slate text-xs leading-relaxed">Coming soon</p>
+                  {today.hook && (
+                    <p className="text-[18px] leading-[28px] opacity-80" style={{ color: "#d1e4fb" }}>
+                      {today.hook}
+                    </p>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {/* One Page Summary */}
-              <Link
-                href={`/learn/${today.id}`}
-                className="bg-ice-white rounded-xl px-5 py-5 group hover:bg-cloud-gray/60 transition-colors"
-              >
-                <span
-                  className="material-symbols-outlined text-slate-ink/40 mb-3 block"
-                  style={{ fontSize: "24px" }}
+              {/* Action Cards (Stacked) */}
+              <div className="space-y-4">
+                <Link
+                  href={`/read/${today.id}`}
+                  className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
                 >
-                  menu_book
-                </span>
-                <p className="text-slate-ink text-sm font-semibold mb-1">One Page Summary</p>
-                <p className="text-blue-slate text-xs leading-relaxed">
-                  Structured overview of all three chapters
-                </p>
-              </Link>
-            </div>
-          </section>
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-10 h-10 flex items-center justify-center rounded-xl"
+                      style={{ backgroundColor: "#d1e4fb" }}
+                    >
+                      <span className="material-symbols-outlined text-primary">article</span>
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">
+                        Read the Essay
+                      </h3>
+                      <p className="text-[14px] leading-[20px] text-muted-gray">
+                        Deep dive into the full d&#39;var Torah
+                      </p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                </Link>
 
-          {/* ── Source texts on Sefaria ── */}
-          {todayChapters.length > 0 && (
-            <section className="pb-6 sm:pb-8 px-4 sm:px-6">
-              <div className="max-w-[680px] mx-auto">
-                <h2 className="text-[10px] sm:text-xs font-semibold tracking-[2px] uppercase text-light-slate mb-3 text-center">
-                  Source texts on Sefaria
-                </h2>
-                <div className="flex flex-wrap items-center justify-center gap-2">
+                {today.media_url ? (
+                  <Link
+                    href={`/listen/${today.id}`}
+                    className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-10 h-10 flex items-center justify-center rounded-xl"
+                        style={{ backgroundColor: "#ffddb7" }}
+                      >
+                        <span className="material-symbols-outlined" style={{ color: "#362308" }}>
+                          headset
+                        </span>
+                      </div>
+                      <div className="text-left">
+                        <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">
+                          Listen
+                        </h3>
+                        <p className="text-[14px] leading-[20px] text-muted-gray">
+                          A spoken talk on today&#39;s themes
+                        </p>
+                      </div>
+                    </div>
+                    <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                  </Link>
+                ) : (
+                  <div className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border opacity-50">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-10 h-10 flex items-center justify-center rounded-xl"
+                        style={{ backgroundColor: "#ffddb7" }}
+                      >
+                        <span className="material-symbols-outlined" style={{ color: "#362308" }}>
+                          headset
+                        </span>
+                      </div>
+                      <div className="text-left">
+                        <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">Listen</h3>
+                        <p className="text-[14px] leading-[20px] text-muted-gray">Coming soon</p>
+                      </div>
+                    </div>
+                    <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                  </div>
+                )}
+
+                <Link
+                  href={`/learn/${today.id}`}
+                  className="w-full flex items-center justify-between p-5 bg-white rounded-[24px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-10 h-10 flex items-center justify-center rounded-xl"
+                      style={{ backgroundColor: "#ffe088" }}
+                    >
+                      <span className="material-symbols-outlined" style={{ color: "#735c00" }}>
+                        summarize
+                      </span>
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-[16px] leading-[24px] font-semibold text-charcoal-text">
+                        One Page Summary
+                      </h3>
+                      <p className="text-[14px] leading-[20px] text-muted-gray">
+                        A structured overview of the text
+                      </p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-muted-gray">chevron_right</span>
+                </Link>
+              </div>
+            </section>
+
+            {/* Chapters Section */}
+            {todayChapters.length > 0 && (
+              <section className="mb-12">
+                <h3
+                  className="text-[12px] leading-[16px] font-semibold tracking-[0.1em] uppercase mb-4"
+                  style={{ fontFamily: "var(--font-sans)", color: "#86868B" }}
+                >
+                  CHAPTERS
+                </h3>
+                <div className="bg-white rounded-[24px] border border-soft-border divide-y divide-soft-border overflow-hidden">
                   {todayChapters.map((ch) => (
                     <a
-                      key={`sefaria-${ch.treatiseId}-${ch.chapter}`}
+                      key={`ch-${ch.treatiseId}-${ch.chapter}`}
                       href={ch.sefariaUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 border border-cloud-gray text-blue-slate text-xs font-medium px-3.5 py-2 rounded-lg hover:border-slate-ink hover:text-slate-ink transition-colors"
+                      className="flex items-center justify-between p-5 hover:bg-surface-container-low transition-colors group"
                     >
-                      {ch.treatiseName} {ch.chapter}
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "13px" }}
-                      >
-                        open_in_new
+                      <span className="text-[16px] leading-[24px]">
+                        Chapter {ch.chapter}
                       </span>
+                      <div className="flex items-center gap-2 text-parchment-gold opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span
+                          className="text-[14px] font-semibold tracking-[0.1em] uppercase"
+                          style={{ fontFamily: "var(--font-sans)" }}
+                        >
+                          SEFARIA
+                        </span>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                          open_in_new
+                        </span>
+                      </div>
                     </a>
                   ))}
                 </div>
-              </div>
-            </section>
-          )}
-        </>
-      ) : (
-        <section className="pt-12 pb-8 px-4">
-          <div className="max-w-[680px] mx-auto text-center">
-            <h1 className="font-serif text-[26px] sm:text-[40px] font-semibold text-slate-ink leading-[1.1] mb-4">
-              The Rambam Experience
-            </h1>
-            <p className="text-blue-slate text-base">
-              Daily Torah insights on the Rambam&#39;s Mishneh Torah.
-            </p>
-          </div>
-        </section>
-      )}
+              </section>
+            )}
 
-      {/* ── Divider ── */}
-      <div className="max-w-[680px] mx-auto px-4 sm:px-6">
-        <div className="h-px bg-cloud-gray" />
-      </div>
-
-      {/* ── Recent ── */}
-      {recent.length > 1 && (
-        <section className="py-6 sm:py-10 px-4 sm:px-6">
-          <div className="max-w-[680px] mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-serif text-lg font-semibold text-slate-ink">
-                Recent
-              </h2>
-              <Link
-                href="/archive"
-                className="text-xs font-medium text-blue-slate hover:text-slate-ink transition-colors"
-              >
-                View all
-              </Link>
-            </div>
-            <div>
-              {recent.slice(1).map((item) => (
-                <article
-                  key={item.id}
-                  className="py-3.5 border-b border-cloud-gray group"
+            {/* Recent Section */}
+            {recent.length > 1 && (
+              <section>
+                <h3
+                  className="text-[12px] leading-[16px] font-semibold tracking-[0.1em] uppercase mb-4"
+                  style={{ fontFamily: "var(--font-sans)", color: "#86868B" }}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <Link href={`/read/${item.id}`} className="flex-1 min-w-0">
-                      <p className="text-[10px] font-medium text-oxide-red tracking-wide uppercase mb-1">
-                        {item.rambam_chapters}
-                      </p>
-                      <h3 className="font-serif text-[15px] sm:text-lg font-medium text-slate-ink mb-1 group-hover:text-oxide-red transition-colors">
+                  RECENT
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {recent.slice(1).map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/read/${item.id}`}
+                      className="bg-white p-6 rounded-[24px] border border-soft-border ios-card-shadow group cursor-pointer hover:border-outline-variant transition-colors"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className="text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-gray"
+                          style={{ fontFamily: "var(--font-sans)" }}
+                        >
+                          {formatShortDate(item.rambam_date || item.published_at)}
+                        </span>
+                        {item.media_url && (
+                          <>
+                            <span className="w-1 h-1 rounded-full bg-outline-variant" />
+                            <span
+                              className="material-symbols-outlined text-parchment-gold"
+                              style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}
+                            >
+                              play_circle
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <h4 className="font-serif text-[24px] leading-[32px] font-semibold text-primary mb-2 group-hover:text-parchment-gold transition-colors">
                         {item.title}
-                      </h3>
+                      </h4>
                       {item.hook && (
-                        <p className="text-xs text-blue-slate leading-relaxed line-clamp-2 hidden sm:block">
+                        <p className="text-[14px] leading-[20px] text-muted-gray line-clamp-2">
                           {item.hook}
                         </p>
                       )}
                     </Link>
-                    <div className="flex items-center gap-2 flex-shrink-0 pt-1">
-                      {item.media_url && (
-                        <Link
-                          href={`/listen/${item.id}`}
-                          className="w-8 h-8 rounded-full border border-cloud-gray flex items-center justify-center text-light-slate hover:text-slate-ink hover:border-slate-ink transition-colors"
-                          title="Listen"
-                        >
-                          <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}
-                          >
-                            play_arrow
-                          </span>
-                        </Link>
-                      )}
-                      <span className="text-[10px] text-light-slate whitespace-nowrap">
-                        {formatShortDate(item.rambam_date || item.published_at)}
-                      </span>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        ) : (
+          <section className="pt-12 pb-8 text-center">
+            <h1 className="font-serif text-[40px] leading-[48px] font-bold text-primary mb-4">
+              The Rambam Experience
+            </h1>
+            <p className="text-[18px] leading-[28px] text-muted-gray">
+              Daily Torah insights on the Rambam&#39;s Mishneh Torah.
+            </p>
+          </section>
+        )}
+      </main>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-cloud-gray py-6 px-4">
-        <div className="max-w-[980px] mx-auto text-center">
-          <p className="text-xs text-light-slate">The Rambam Experience</p>
-        </div>
-      </footer>
+      <BottomNav />
     </div>
   );
 }

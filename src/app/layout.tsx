@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Literata, Noto_Serif_Hebrew } from "next/font/google";
+import { Inter, Source_Serif_4, Noto_Serif_Hebrew } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,9 +8,9 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const literata = Literata({
+const sourceSerif4 = Source_Serif_4({
   subsets: ["latin"],
-  variable: "--font-literata",
+  variable: "--font-source-serif",
   weight: ["400", "500", "600", "700"],
 });
 
@@ -40,7 +40,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${literata.variable} ${notoSerifHebrew.variable} antialiased`}
+        className={`${inter.variable} ${sourceSerif4.variable} ${notoSerifHebrew.variable} antialiased`}
       >
         {children}
       </body>
