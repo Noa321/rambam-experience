@@ -42,7 +42,7 @@
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   background-color: #FDFBF7;
@@ -73,6 +73,15 @@ h1, h2, h3, h4 {
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.22s ease-out;
 }
 
 .line-clamp-2 {

@@ -301,24 +301,19 @@ export default async function Home() {
                 </h3>
                 <div className="bg-white rounded-[20px] border border-soft-border divide-y divide-soft-border overflow-hidden">
                   {todayChapters.map((ch) => (
-                    <div key={`ch-${ch.treatiseId}-${ch.chapter}`} className="flex items-center justify-between group">
-                      <Link
-                        href={`/study/${ch.treatiseId}/${ch.chapter}`}
-                        className="flex-1 p-4 hover:bg-surface-container-low transition-colors"
+                    <Link
+                      key={`ch-${ch.treatiseId}-${ch.chapter}`}
+                      href={`/study/${ch.treatiseId}/${ch.chapter}`}
+                      className="flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group"
+                    >
+                      <span className="text-[15px] text-charcoal-text">{ch.treatiseName} Chapter {ch.chapter}</span>
+                      <span
+                        className="material-symbols-outlined text-muted-gray group-hover:text-parchment-gold transition-colors"
+                        style={{ fontSize: "20px" }}
                       >
-                        <span className="text-[15px] text-charcoal-text">{ch.treatiseName} Chapter {ch.chapter}</span>
-                      </Link>
-                      <a
-                        href={ch.sefariaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-parchment-gold px-4 py-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Open on Sefaria"
-                      >
-                        <span className="text-[11px] font-semibold tracking-[0.1em] uppercase" style={{ fontFamily: "var(--font-sans)" }}>SEFARIA</span>
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>open_in_new</span>
-                      </a>
-                    </div>
+                        chevron_right
+                      </span>
+                    </Link>
                   ))}
                 </div>
               </section>

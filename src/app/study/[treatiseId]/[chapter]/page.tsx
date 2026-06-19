@@ -176,7 +176,7 @@ export default function StudyPage() {
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="w-8 h-8 border-2 border-soft-border border-t-primary rounded-full animate-spin" />
             <p className="text-[15px] text-muted-gray">
-              Loading from Sefaria...
+              Loading text…
             </p>
           </div>
         )}
@@ -281,6 +281,15 @@ export default function StudyPage() {
               </span>
             </button>
           </div>
+        )}
+
+        {!loading && !error && halachot.length > 0 && (
+          <p
+            className="mt-8 text-center text-[11px] text-muted-gray"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            Text courtesy of Sefaria
+          </p>
         )}
       </main>
     </div>
