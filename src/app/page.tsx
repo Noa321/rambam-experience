@@ -1,5 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
 import { books } from "@/data/books";
+import { cyclePositionFromContent } from "@/lib/cycle";
 import Link from "next/link";
 import Header from "@/components/Header";
 
@@ -189,6 +190,7 @@ export default async function Home() {
   const today = await getTodaysContent();
   const recent = await getRecentContent();
   const todayChapters = today ? parseChaptersFromContent(today.rambam_chapters, today.hilchot, today.sefer) : [];
+  const cyclePos = today ? cyclePositionFromContent(today.rambam_chapters, today.hilchot) : null;
 
   return (
     <div className="min-h-screen pb-28">
@@ -201,6 +203,30 @@ export default async function Home() {
             <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-2" style={{ fontFamily: "var(--font-sans)" }}>
               {formatDateUpper(today.rambam_date || today.published_at)}
             </p>
+
+            {/* Journey strip */}
+            {cyclePos && (
+              <Link
+                href="/journey"
+                className="block mb-5 rounded-xl border border-soft-border bg-white p-3.5 hover:bg-surface-container-low transition-colors"
+                style={{ borderLeft: "3px solid #B8860B" }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[12px] font-medium text-charcoal-text">
+                    Your journey · {cyclePos.percent}% through the Mishneh Torah
+                  </span>
+                  <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "18px" }}>
+                    chevron_right
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-surface-container-low overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-parchment-gold"
+                    style={{ width: `${cyclePos.percent}%` }}
+                  />
+                </div>
+              </Link>
+            )}
 
             {/* Hero Card */}
             <section className="mb-8">

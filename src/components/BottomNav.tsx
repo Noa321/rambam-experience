@@ -1,13 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { recordVisit } from "@/lib/streak";
 
 export default function BottomNav() {
   const pathname = usePathname();
 
+  // Record the daily visit for the journey streak (once per app session).
+  useEffect(() => {
+    recordVisit();
+  }, []);
+
   const tabs = [
     { href: "/", icon: "calendar_today", label: "Today", match: "/" },
+    { href: "/journey", icon: "explore", label: "Journey", match: "/journey" },
     { href: "/library", icon: "auto_stories", label: "Library", match: "/library" },
     { href: "/archive", icon: "history", label: "Archive", match: "/archive" },
   ];
