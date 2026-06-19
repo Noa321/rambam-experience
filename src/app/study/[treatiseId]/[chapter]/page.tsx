@@ -209,7 +209,7 @@ export default function StudyPage() {
             {halachot.map((h) => (
               <article
                 key={h.number}
-                className="bg-white rounded-[20px] p-4 sm:p-5 border border-soft-border ios-card-shadow"
+                className="bg-white rounded-xl p-4 sm:p-5 border border-soft-border"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-semibold">

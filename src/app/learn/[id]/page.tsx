@@ -124,7 +124,7 @@ export default async function LearnPage({
         className="sticky top-0 z-50 border-b border-soft-border bottom-nav-blur"
         style={{ backgroundColor: "rgba(253, 251, 247, 0.85)" }}
       >
-        <div className="max-w-[800px] mx-auto px-5 h-14 flex items-center justify-between">
+        <div className="max-w-[800px] mx-auto px-5 h-14 flex items-center">
           <Link
             href="/"
             className="flex items-center gap-1 text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
@@ -132,23 +132,36 @@ export default async function LearnPage({
             <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_back_ios</span>
             Home
           </Link>
-
-          <div className="flex items-center gap-4">
-            <Link href={`/read/${content.id}`} className="text-[15px] font-medium text-muted-gray hover:text-primary transition-colors">
-              Read Essay
-            </Link>
-            {content.media_url && (
-              <Link href={`/listen/${content.id}`} className="text-[15px] font-medium text-muted-gray hover:text-primary transition-colors flex items-center gap-1">
-                <span className="material-symbols-outlined" style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-                Listen
-              </Link>
-            )}
-          </div>
         </div>
       </header>
 
       {/* One-Page Learn content */}
       <div dangerouslySetInnerHTML={{ __html: learnHtml }} />
+
+      {/* Continue with today's learning */}
+      <div className="max-w-[680px] mx-auto px-5 pb-6 -mt-2">
+        <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-3" style={{ fontFamily: "var(--font-sans)" }}>
+          Continue
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link
+            href={`/read/${content.id}`}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white text-[15px] font-medium hover:opacity-90 transition-opacity"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>article</span>
+            Read the full essay
+          </Link>
+          {content.media_url && (
+            <Link
+              href={`/listen/${content.id}`}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-soft-border bg-white text-primary text-[15px] font-medium hover:bg-surface-container-low transition-colors"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+              Listen
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

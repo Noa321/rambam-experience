@@ -56,12 +56,12 @@ export default async function ArchivePage() {
         {content.length === 0 ? (
           <p className="text-center text-muted-gray text-[15px] py-12">No content published yet.</p>
         ) : (
-          <div className="bg-white rounded-[20px] border border-soft-border ios-card-shadow divide-y divide-soft-border overflow-hidden">
+          <div className="bg-surface-container-low rounded-xl border border-soft-border divide-y divide-soft-border overflow-hidden">
             {content.map((item) => (
               <Link
                 key={item.id}
                 href={`/read/${item.id}`}
-                className="block p-4 hover:bg-surface-container-low transition-colors active:scale-[0.99] group"
+                className="block p-4 hover:bg-white transition-colors active:scale-[0.99] group"
               >
                 <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-parchment-gold mb-1" style={{ fontFamily: "var(--font-sans)" }}>
                   {item.rambam_chapters}

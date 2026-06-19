@@ -204,7 +204,7 @@ export default async function Home() {
 
             {/* Hero Card */}
             <section className="mb-8">
-              <div className="relative overflow-hidden rounded-[20px] bg-primary text-white px-5 py-6 sm:px-8 sm:py-10 mb-6">
+              <div className="relative overflow-hidden rounded-2xl bg-primary text-white px-5 py-6 sm:px-8 sm:py-10 mb-6">
                 <div className="relative z-10 text-center">
                   <span
                     className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-semibold tracking-[0.1em] uppercase mb-3"
@@ -230,7 +230,8 @@ export default async function Home() {
               <div className="space-y-3">
                 <Link
                   href={`/read/${today.id}`}
-                  className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-soft-border hover:bg-surface-container-low transition-colors active:scale-[0.99]"
+                  style={{ borderLeft: "3px solid #B8860B" }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#d1e4fb" }}>
@@ -247,7 +248,8 @@ export default async function Home() {
                 {today.media_url ? (
                   <Link
                     href={`/listen/${today.id}`}
-                    className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                    className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-soft-border hover:bg-surface-container-low transition-colors active:scale-[0.99]"
+                    style={{ borderLeft: "3px solid #B8860B" }}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#ffddb7" }}>
@@ -261,7 +263,7 @@ export default async function Home() {
                     <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
                   </Link>
                 ) : (
-                  <div className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border opacity-40">
+                  <div className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-soft-border opacity-40" style={{ borderLeft: "3px solid #E5E5E7" }}>
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#ffddb7" }}>
                         <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#362308" }}>headset</span>
@@ -277,7 +279,8 @@ export default async function Home() {
 
                 <Link
                   href={`/learn/${today.id}`}
-                  className="w-full flex items-center justify-between p-4 bg-white rounded-[20px] ios-card-shadow border border-soft-border hover:bg-surface-container-low transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-soft-border hover:bg-surface-container-low transition-colors active:scale-[0.99]"
+                  style={{ borderLeft: "3px solid #B8860B" }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#ffe088" }}>
@@ -299,12 +302,12 @@ export default async function Home() {
                 <h3 className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-3" style={{ fontFamily: "var(--font-sans)" }}>
                   TODAY&#39;S CHAPTERS
                 </h3>
-                <div className="bg-white rounded-[20px] border border-soft-border divide-y divide-soft-border overflow-hidden">
+                <div className="bg-surface-container-low rounded-xl border border-soft-border divide-y divide-soft-border overflow-hidden">
                   {todayChapters.map((ch) => (
                     <Link
                       key={`ch-${ch.treatiseId}-${ch.chapter}`}
                       href={`/study/${ch.treatiseId}/${ch.chapter}`}
-                      className="flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group"
+                      className="flex items-center justify-between p-4 hover:bg-white transition-colors group"
                     >
                       <span className="text-[15px] text-charcoal-text">{ch.treatiseName} Chapter {ch.chapter}</span>
                       <span
@@ -330,7 +333,7 @@ export default async function Home() {
                     <Link
                       key={item.id}
                       href={`/read/${item.id}`}
-                      className="bg-white p-5 rounded-[20px] border border-soft-border ios-card-shadow group hover:border-outline-variant transition-colors"
+                      className="bg-white p-5 rounded-xl border border-soft-border group hover:border-outline-variant hover:bg-surface-container-low transition-colors"
                     >
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-gray" style={{ fontFamily: "var(--font-sans)" }}>

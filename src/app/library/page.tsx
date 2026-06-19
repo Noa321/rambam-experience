@@ -25,7 +25,7 @@ export default function LibraryPage() {
           {books.map((book) => {
             const totalChapters = getBookChapterCount(book);
             return (
-              <div key={book.id} className="bg-white rounded-[20px] border border-soft-border ios-card-shadow overflow-hidden">
+              <div key={book.id} className="bg-white rounded-xl border border-soft-border overflow-hidden">
                 <div className="h-1" style={{ backgroundColor: book.color }} />
                 <div className="p-5">
                   <p className="text-[10px] font-semibold tracking-[0.1em] uppercase mb-1" style={{ color: book.color, fontFamily: "var(--font-sans)" }}>
