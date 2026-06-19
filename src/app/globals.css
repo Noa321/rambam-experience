@@ -84,6 +84,36 @@ h1, h2, h3, h4 {
   animation: slideInLeft 0.22s ease-out;
 }
 
+/* Journey map animations */
+@keyframes growBar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.bar-grow {
+  transform-origin: left center;
+  animation: growBar 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+@keyframes pulseHere {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(184, 134, 11, 0.55); }
+  50% { box-shadow: 0 0 0 7px rgba(184, 134, 11, 0); }
+}
+.pulse-here {
+  animation: pulseHere 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-grow, .fade-up, .pulse-here { animation: none; }
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

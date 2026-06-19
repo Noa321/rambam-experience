@@ -1,15 +1,16 @@
 import { getSupabase } from "@/lib/supabase";
-import { findTreatise, getBookTreatiseCount } from "@/data/books";
+import { findTreatise } from "@/data/books";
 import {
   cyclePositionFromContent,
   bookProgressList,
+  countChapters,
   TOTAL_CHAPTERS,
   TOTAL_TREATISES,
   TOTAL_BOOKS,
 } from "@/lib/cycle";
 import Header from "@/components/Header";
 import JourneyStats from "@/components/JourneyStats";
-import Link from "next/link";
+import BookMap, { type BookMapItem } from "@/components/BookMap";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +55,20 @@ export default async function JourneyPage() {
   const percent = pos?.percent ?? 0;
   const bookProgress = bookProgressList(globalChapter);
   const current = pos ? findTreatise(pos.treatiseId) : null;
+  const todayChapters = today ? countChapters(today.rambam_chapters) : 3;
+
+  const bookMapItems: BookMapItem[] = bookProgress.map((bp) => ({
+    id: bp.book.id,
+    num: bp.book.num,
+    eng: bp.book.eng,
+    heb: bp.book.heb,
+    color: bp.book.color,
+    state: bp.state,
+    fillPercent: bp.fillPercent,
+    chapters: bp.chapters,
+    treatiseCount: bp.book.treatises.length,
+    treatises: bp.book.treatises.map((t) => ({ id: t.id, name: t.name, chapters: t.chapters })),
+  }));
 
   return (
     <div className="min-h-screen pb-28">
@@ -97,20 +112,33 @@ export default async function JourneyPage() {
           </div>
 
           {/* Segmented 14-book map */}
-          <div className="flex gap-[2px] h-3 rounded-full overflow-hidden">
-            {bookProgress.map((bp) => (
-              <div
-                key={bp.book.id}
-                className="relative"
-                style={{ flexGrow: bp.chapters, flexBasis: 0, backgroundColor: bp.book.color + "55" }}
-                title={`${bp.book.eng} — ${bp.fillPercent}%`}
-              >
+          <div className="relative">
+            <div className="flex gap-[2px] h-3 rounded-full overflow-hidden">
+              {bookProgress.map((bp, i) => (
                 <div
-                  className="absolute inset-y-0 left-0"
-                  style={{ width: `${bp.fillPercent}%`, backgroundColor: bp.book.color }}
-                />
-              </div>
-            ))}
+                  key={bp.book.id}
+                  className="relative"
+                  style={{ flexGrow: bp.chapters, flexBasis: 0, backgroundColor: bp.book.color + "55" }}
+                  title={`${bp.book.eng} — ${bp.fillPercent}%`}
+                >
+                  <div
+                    className="absolute inset-y-0 left-0 bar-grow"
+                    style={{
+                      width: `${bp.fillPercent}%`,
+                      backgroundColor: bp.book.color,
+                      animationDelay: `${i * 45}ms`,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+            {percent > 0 && (
+              <div
+                className="absolute top-1/2 w-3.5 h-3.5 rounded-full bg-parchment-gold ring-2 ring-white pulse-here"
+                style={{ left: `${percent}%`, transform: "translate(-50%, -50%)" }}
+                title="Today"
+              />
+            )}
           </div>
           <div className="flex justify-between mt-2.5">
             <span className="text-[10px] tracking-[0.08em] uppercase" style={{ color: "#96a9be", fontFamily: "var(--font-sans)" }}>
@@ -138,16 +166,7 @@ export default async function JourneyPage() {
           >
             Your practice
           </h2>
-          <JourneyStats />
-          <Link
-            href="/"
-            className="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white text-[15px] font-medium hover:opacity-90 transition-opacity"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              menu_book
-            </span>
-            Continue today&#39;s learning
-          </Link>
+          <JourneyStats todayChapters={todayChapters} />
         </section>
 
         {/* The 14 books */}
@@ -158,61 +177,7 @@ export default async function JourneyPage() {
           >
             The fourteen books
           </h2>
-          <div className="space-y-2.5">
-            {bookProgress.map((bp) => (
-              <div
-                key={bp.book.id}
-                className="rounded-xl border bg-white p-4"
-                style={
-                  bp.state === "current"
-                    ? { borderColor: "#B8860B", borderLeft: "3px solid #B8860B" }
-                    : { borderColor: "#E5E5E7" }
-                }
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-baseline gap-2 min-w-0">
-                    <span
-                      className="text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-gray shrink-0"
-                      style={{ fontFamily: "var(--font-sans)" }}
-                    >
-                      Book {bp.book.num}
-                    </span>
-                    <h3 className="font-serif text-[17px] font-semibold text-primary truncate">
-                      {bp.book.eng}
-                    </h3>
-                    <span className="font-serif text-[15px] text-muted-gray shrink-0">{bp.book.heb}</span>
-                  </div>
-
-                  {bp.state === "current" ? (
-                    <span
-                      className="shrink-0 text-[9px] font-semibold tracking-[0.1em] uppercase px-2 py-1 rounded-full"
-                      style={{ backgroundColor: "rgba(184,134,11,0.12)", color: "#B8860B", fontFamily: "var(--font-sans)" }}
-                    >
-                      You are here
-                    </span>
-                  ) : bp.state === "done" ? (
-                    <span className="material-symbols-outlined text-parchment-gold shrink-0" style={{ fontSize: "18px" }}>
-                      check_circle
-                    </span>
-                  ) : null}
-                </div>
-
-                <div className="h-1.5 rounded-full bg-surface-container-low overflow-hidden">
-                  <div
-                    className="h-full rounded-full"
-                    style={{ width: `${bp.fillPercent}%`, backgroundColor: bp.book.color }}
-                  />
-                </div>
-                <p
-                  className="text-[11px] text-muted-gray mt-1.5"
-                  style={{ fontFamily: "var(--font-sans)" }}
-                >
-                  {bp.chapters} chapters · {getBookTreatiseCount(bp.book)} treatises
-                  {bp.state === "current" && ` · ${bp.fillPercent}% in`}
-                </p>
-              </div>
-            ))}
-          </div>
+          <BookMap books={bookMapItems} />
           <p className="text-[12px] text-muted-gray text-center mt-5" style={{ fontFamily: "var(--font-sans)" }}>
             {TOTAL_BOOKS} books · {TOTAL_TREATISES} treatises · {TOTAL_CHAPTERS.toLocaleString()} chapters
           </p>

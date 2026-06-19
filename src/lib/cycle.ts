@@ -117,6 +117,19 @@ export function cyclePositionFromContent(
   };
 }
 
+// Count how many chapters today's learning covers (e.g. "Maaser Sheini 5-7" = 3).
+export function countChapters(rambamChapters: string): number {
+  let n = 0;
+  for (const part of (rambamChapters || "").split(",")) {
+    const m = part.trim().match(/(\d+)(?:\s*[-–]\s*(\d+))?$/);
+    if (!m) continue;
+    const a = parseInt(m[1], 10);
+    const b = m[2] ? parseInt(m[2], 10) : a;
+    n += Math.max(1, b - a + 1);
+  }
+  return n || 3;
+}
+
 export interface BookProgress {
   book: Book;
   index: number;
