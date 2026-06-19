@@ -71,54 +71,45 @@ export default async function ListenPage({
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen pb-28">
       {/* Header */}
-      <header className="border-b border-cloud-gray">
-        <div className="max-w-[600px] mx-auto px-6 h-16 flex items-center">
-          <Link href="/" className="flex items-center gap-2.5">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 40 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z"
-                fill="#334155"
-              />
-              <path
-                d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z"
-                fill="#334155"
-                opacity="0.7"
-              />
-              <path d="M18 6H22V34H18V6Z" fill="#334155" opacity="0.4" />
-            </svg>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-serif text-base font-semibold text-slate-ink leading-none">
-                The Rambam
-              </span>
-              <span className="text-[9px] font-semibold tracking-[2.5px] text-oxide-red leading-none">
-                EXPERIENCE
-              </span>
-            </div>
+      <header
+        className="sticky top-0 z-50 border-b border-soft-border bottom-nav-blur"
+        style={{ backgroundColor: "rgba(253, 251, 247, 0.85)" }}
+      >
+        <div className="max-w-[600px] mx-auto px-5 h-14 flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-1 text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_back_ios</span>
+            Home
+          </Link>
+          <Link
+            href={`/read/${content.id}`}
+            className="text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
+          >
+            Read Essay
           </Link>
         </div>
       </header>
 
-      <div className="max-w-[600px] mx-auto px-6 py-12">
+      <div className="max-w-[600px] mx-auto px-5 py-10">
         {/* Content */}
         <div className="mb-10">
-          <p className="text-xs font-semibold tracking-[3px] uppercase text-oxide-red mb-4">
+          <p
+            className="text-[10px] font-semibold tracking-[0.15em] uppercase text-parchment-gold mb-4"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
             Daily Talk
           </p>
-          <h1 className="font-serif text-[28px] font-semibold text-slate-ink leading-tight mb-4">
+          <h1 className="font-serif text-[28px] font-semibold text-primary leading-tight mb-4">
             {content.title}
           </h1>
-          <p className="font-serif text-base text-oxide-red/80 italic leading-relaxed mb-5">
+          <p className="font-serif text-base text-parchment-gold/80 italic leading-relaxed mb-5">
             {content.hook}
           </p>
-          <div className="text-sm text-light-slate flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 text-[13px] text-muted-gray">
             <span>{content.rambam_chapters}</span>
             <span>{formattedDate}</span>
           </div>
@@ -129,22 +120,18 @@ export default async function ListenPage({
 
         {/* Summary */}
         {content.summary && (
-          <div className="mt-10 pt-8 border-t border-cloud-gray">
-            <p className="text-xs font-semibold tracking-[3px] uppercase text-light-slate mb-4">
+          <div className="mt-10 pt-8 border-t border-soft-border">
+            <p
+              className="text-[10px] font-semibold tracking-[0.15em] uppercase text-muted-gray mb-4"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
               About This Talk
             </p>
-            <p className="font-serif text-base text-slate-ink leading-relaxed">
+            <p className="font-serif text-base text-primary leading-relaxed">
               {content.summary}
             </p>
           </div>
         )}
-
-        {/* Footer */}
-        <footer className="mt-16 pt-6 border-t border-cloud-gray text-center">
-          <p className="text-sm text-light-slate">
-            The Rambam Experience
-          </p>
-        </footer>
       </div>
     </div>
   );

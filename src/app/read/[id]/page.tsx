@@ -3,8 +3,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-
 export const revalidate = 300;
+
 interface ContentRecord {
   id: string;
   title: string;
@@ -73,50 +73,29 @@ export default async function ReadPage({
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-cloud-gray">
-        <div className="max-w-[680px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 40 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z"
-                fill="#334155"
-              />
-              <path
-                d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z"
-                fill="#334155"
-                opacity="0.7"
-              />
-              <path d="M18 6H22V34H18V6Z" fill="#334155" opacity="0.4" />
-            </svg>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-serif text-base font-semibold text-slate-ink leading-none">
-                The Rambam
-              </span>
-              <span className="text-[9px] font-semibold tracking-[2.5px] text-oxide-red leading-none">
-                EXPERIENCE
-              </span>
-            </div>
+      <header
+        className="sticky top-0 z-50 border-b border-soft-border bottom-nav-blur"
+        style={{ backgroundColor: "rgba(253, 251, 247, 0.85)" }}
+      >
+        <div className="max-w-[680px] mx-auto px-5 h-14 flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-1 text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_back_ios</span>
+            Home
           </Link>
 
           {content.media_url && (
             <Link
               href={`/listen/${content.id}`}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-ink hover:text-oxide-red transition-colors"
+              className="flex items-center gap-1.5 text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
             >
               <span
                 className="material-symbols-outlined"
-                style={{
-                  fontSize: "18px",
-                  fontVariationSettings: "'FILL' 1",
-                }}
+                style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}
               >
                 play_arrow
               </span>
@@ -127,42 +106,36 @@ export default async function ReadPage({
       </header>
 
       {/* Article */}
-      <article className="max-w-[680px] mx-auto px-6 py-12">
-        <div className="mb-10 text-center">
-          <p className="text-xs font-semibold tracking-[3px] uppercase text-oxide-red mb-6">
+      <article className="max-w-[680px] mx-auto px-5 py-10">
+        <div className="mb-8 text-center">
+          <p
+            className="text-[10px] font-semibold tracking-[0.15em] uppercase text-parchment-gold mb-4"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
             {formattedDate}
           </p>
-          <h1 className="font-serif text-[32px] sm:text-[40px] font-semibold text-slate-ink leading-[1.15] mb-4">
+          <h1 className="font-serif text-[28px] sm:text-[36px] font-semibold text-primary leading-[1.15] mb-3">
             {content.title}
           </h1>
-          <p className="text-blue-slate text-sm">
+          <p className="text-[14px] text-muted-gray">
             {content.rambam_chapters}
-            <span className="mx-2 text-cloud-gray">|</span>
+            <span className="mx-2 text-soft-border">|</span>
             Sefer {content.sefer}
           </p>
         </div>
 
-        {/* Body - render HTML */}
+        {/* Body */}
         {content.body_format === "html" ? (
           <div
             className="prose-rambam"
             dangerouslySetInnerHTML={{ __html: content.body }}
           />
         ) : (
-          <div className="font-serif text-base text-slate-ink leading-[1.75] whitespace-pre-wrap">
+          <div className="font-serif text-base text-primary leading-[1.75] whitespace-pre-wrap">
             {content.body}
           </div>
         )}
       </article>
-
-      {/* Footer */}
-      <footer className="border-t border-cloud-gray py-10 px-6">
-        <div className="max-w-[680px] mx-auto text-center">
-          <p className="text-sm text-light-slate">
-            The Rambam Experience
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

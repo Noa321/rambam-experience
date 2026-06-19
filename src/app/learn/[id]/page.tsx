@@ -18,7 +18,6 @@ interface ContentRecord {
   published_at: string;
 }
 
-/* Slug map — maps hilchot names to the storage filename pattern */
 function deriveLearnSlug(chapters: string): string {
   return chapters
     .toLowerCase()
@@ -72,13 +71,11 @@ export default async function LearnPage({
   const slug = deriveLearnSlug(content.rambam_chapters);
   const learnUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://htwyavvzmcmlucpmqytb.supabase.co"}/storage/v1/object/public/media/learns/learn-${slug}.html`;
 
-  /* Fetch the One-Page Learn HTML from storage */
   let learnHtml: string | null = null;
   try {
     const res = await fetch(learnUrl, { next: { revalidate: 0 } });
     if (res.ok) {
       const fullHtml = await res.text();
-      /* Extract just the <body> inner content and <style> block */
       const styleMatch = fullHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
       const bodyMatch = fullHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       const styleTag = styleMatch ? `<style>${styleMatch[1]}</style>` : "";
@@ -86,31 +83,33 @@ export default async function LearnPage({
       learnHtml = styleTag + bodyContent;
     }
   } catch {
-    /* Storage file not found — learn page not available */
+    /* Storage file not found */
   }
 
   if (!learnHtml) {
     return (
-      <div className="min-h-screen bg-white">
-        <header className="sticky top-0 z-50 bg-white border-b border-cloud-gray">
-          <div className="max-w-[980px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-                <path d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z" fill="#334155" />
-                <path d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z" fill="#334155" opacity="0.7" />
-                <path d="M18 6H22V34H18V6Z" fill="#334155" opacity="0.4" />
-              </svg>
-              <div className="flex items-baseline gap-1">
-                <span className="font-serif text-base font-semibold text-slate-ink leading-none">The Rambam</span>
-                <span className="text-[8px] font-semibold tracking-[2px] text-oxide-red leading-none hidden sm:inline" style={{ fontFamily: "var(--font-sans)" }}>EXPERIENCE</span>
-              </div>
+      <div className="min-h-screen pb-28">
+        <header
+          className="sticky top-0 z-50 border-b border-soft-border bottom-nav-blur"
+          style={{ backgroundColor: "rgba(253, 251, 247, 0.85)" }}
+        >
+          <div className="max-w-[800px] mx-auto px-5 h-14 flex items-center">
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_back_ios</span>
+              Home
             </Link>
           </div>
         </header>
-        <div className="max-w-[680px] mx-auto px-6 py-20 text-center">
-          <h1 className="font-serif text-2xl font-semibold text-slate-ink mb-4">One-Page Learn coming soon</h1>
-          <p className="text-blue-slate mb-8">The One-Page Learn for {content.rambam_chapters} is not yet available.</p>
-          <Link href={`/read/${content.id}`} className="inline-flex items-center gap-2 bg-slate-ink text-white text-sm font-medium px-6 py-2.5 hover:opacity-90 transition-opacity" style={{ borderRadius: "980px" }}>
+        <div className="max-w-[680px] mx-auto px-5 py-20 text-center">
+          <h1 className="font-serif text-2xl font-semibold text-primary mb-4">One-Page Learn coming soon</h1>
+          <p className="text-muted-gray mb-8">The One-Page Learn for {content.rambam_chapters} is not yet available.</p>
+          <Link
+            href={`/read/${content.id}`}
+            className="inline-flex items-center gap-2 bg-primary text-white text-[15px] font-medium px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity"
+          >
             Read the essay instead
           </Link>
         </div>
@@ -119,28 +118,27 @@ export default async function LearnPage({
   }
 
   return (
-    <div className="min-h-screen bg-ice-white">
+    <div className="min-h-screen pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-cloud-gray">
-        <div className="max-w-[980px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-              <path d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z" fill="#334155" />
-              <path d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z" fill="#334155" opacity="0.7" />
-              <path d="M18 6H22V34H18V6Z" fill="#334155" opacity="0.4" />
-            </svg>
-            <div className="flex items-baseline gap-1">
-              <span className="font-serif text-base font-semibold text-slate-ink leading-none">The Rambam</span>
-              <span className="text-[8px] font-semibold tracking-[2px] text-oxide-red leading-none hidden sm:inline" style={{ fontFamily: "var(--font-sans)" }}>EXPERIENCE</span>
-            </div>
+      <header
+        className="sticky top-0 z-50 border-b border-soft-border bottom-nav-blur"
+        style={{ backgroundColor: "rgba(253, 251, 247, 0.85)" }}
+      >
+        <div className="max-w-[800px] mx-auto px-5 h-14 flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-1 text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_back_ios</span>
+            Home
           </Link>
 
           <div className="flex items-center gap-4">
-            <Link href={`/read/${content.id}`} className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors">
-              Read essay
+            <Link href={`/read/${content.id}`} className="text-[15px] font-medium text-muted-gray hover:text-primary transition-colors">
+              Read Essay
             </Link>
             {content.media_url && (
-              <Link href={`/listen/${content.id}`} className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors flex items-center gap-1">
+              <Link href={`/listen/${content.id}`} className="text-[15px] font-medium text-muted-gray hover:text-primary transition-colors flex items-center gap-1">
                 <span className="material-symbols-outlined" style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 Listen
               </Link>

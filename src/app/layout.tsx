@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4, Noto_Serif_Hebrew } from "next/font/google";
+import BottomNav from "@/components/BottomNav";
 import "./globals.css";
 
 const inter = Inter({
@@ -43,6 +44,7 @@ export default function RootLayout({
         className={`${inter.variable} ${sourceSerif4.variable} ${notoSerifHebrew.variable} antialiased`}
       >
         {children}
+        <BottomNav />
       </body>
     </html>
   );

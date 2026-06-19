@@ -1,12 +1,13 @@
 import { getSupabase } from "@/lib/supabase";
 import { Metadata } from "next";
 import Link from "next/link";
+import Header from "@/components/Header";
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Archive | The Rambam Experience",
-  description: "Browse every d\'var Torah in The Rambam Experience.",
+  description: "Browse every d'var Torah in The Rambam Experience.",
 };
 
 interface ContentRecord {
@@ -43,68 +44,50 @@ function formatFullDate(dateStr: string) {
 export default async function ArchivePage() {
   const content = await getAllContent();
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-50 bg-white border-b border-cloud-gray">
-        <div className="max-w-[980px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-              <path d="M8 8C8 6.9 8.9 6 10 6H18V34H10C8.9 34 8 33.1 8 32V8Z" fill="#334155" />
-              <path d="M22 6H30C31.1 6 32 6.9 32 8V32C32 33.1 31.1 34 30 34H22V6Z" fill="#334155" opacity="0.7" />
-              <path d="M18 6H22V34H18V6Z" fill="#334155" opacity="0.4" />
-            </svg>
-            <div className="flex items-baseline gap-1">
-              <span className="font-serif text-base font-semibold text-slate-ink leading-none">The Rambam</span>
-              <span className="text-[8px] font-semibold tracking-[2px] text-oxide-red leading-none hidden sm:inline" style={{ fontFamily: "var(--font-sans)" }}>EXPERIENCE</span>
-            </div>
-          </Link>
-          <nav className="flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors">Today</Link>
-            <Link href="/library" className="text-sm font-medium text-light-slate hover:text-slate-ink transition-colors">Library</Link>
-            <span className="text-sm font-medium text-slate-ink">Archive</span>
-          </nav>
+    <div className="min-h-screen pb-28">
+      <Header />
+
+      <div className="max-w-[800px] mx-auto px-5">
+        <div className="pt-8 pb-6">
+          <h1 className="font-serif text-[28px] sm:text-[34px] font-semibold text-primary leading-tight">Archive</h1>
+          <p className="text-[15px] text-muted-gray mt-1">Every d&#39;var Torah from The Rambam Experience</p>
         </div>
-      </header>
-      <section className="pt-10 sm:pt-14 pb-6 sm:pb-8 px-4 sm:px-6">
-        <div className="max-w-[680px] mx-auto text-center">
-          <h1 className="font-serif text-[28px] sm:text-[36px] font-semibold text-slate-ink leading-[1.15] mb-2">Archive</h1>
-          <p className="text-blue-slate text-sm">Every d&#39;var Torah from The Rambam Experience</p>
-        </div>
-      </section>
-      <section className="pb-12 px-4 sm:px-6">
-        <div className="max-w-[680px] mx-auto">
-          {content.length === 0 ? (
-            <p className="text-center text-light-slate text-sm py-12">No content published yet.</p>
-          ) : (
-            content.map((item) => (
-              <article key={item.id} className="py-4 border-b border-cloud-gray group">
-                <div className="flex items-start justify-between gap-4">
-                  <Link href={`/read/${item.id}`} className="flex-1 min-w-0">
-                    <p className="text-[10px] font-medium text-oxide-red tracking-wide uppercase mb-1">{item.rambam_chapters}</p>
-                    <h2 className="font-serif text-[16px] sm:text-lg font-medium text-slate-ink mb-1 group-hover:text-oxide-red transition-colors">{item.title}</h2>
-                    {item.hook && <p className="text-xs text-blue-slate leading-relaxed line-clamp-2 mb-1">{item.hook}</p>}
-                    <p className="text-[11px] text-light-slate">{formatFullDate(item.rambam_date || item.published_at)}<span className="mx-1.5 text-cloud-gray">|</span>Sefer {item.sefer}</p>
-                  </Link>
-                  <div className="flex items-center gap-2 flex-shrink-0 pt-2">
-                    <Link href={`/read/${item.id}`} className="w-8 h-8 rounded-full border border-cloud-gray flex items-center justify-center text-light-slate hover:text-slate-ink hover:border-slate-ink transition-colors" title="Read">
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>article</span>
-                    </Link>
-                    {item.media_url && (
-                      <Link href={`/listen/${item.id}`} className="w-8 h-8 rounded-full border border-cloud-gray flex items-center justify-center text-light-slate hover:text-slate-ink hover:border-slate-ink transition-colors" title="Listen">
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-                      </Link>
-                    )}
-                  </div>
+
+        {content.length === 0 ? (
+          <p className="text-center text-muted-gray text-[15px] py-12">No content published yet.</p>
+        ) : (
+          <div className="bg-white rounded-[20px] border border-soft-border ios-card-shadow divide-y divide-soft-border overflow-hidden">
+            {content.map((item) => (
+              <Link
+                key={item.id}
+                href={`/read/${item.id}`}
+                className="block p-4 hover:bg-surface-container-low transition-colors active:scale-[0.99] group"
+              >
+                <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-parchment-gold mb-1" style={{ fontFamily: "var(--font-sans)" }}>
+                  {item.rambam_chapters}
+                </p>
+                <h2 className="font-serif text-[17px] font-semibold text-primary mb-1 group-hover:text-parchment-gold transition-colors">{item.title}</h2>
+                {item.hook && <p className="text-[13px] text-muted-gray line-clamp-2 mb-1.5">{item.hook}</p>}
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-muted-gray" style={{ fontFamily: "var(--font-sans)" }}>
+                    {formatFullDate(item.rambam_date || item.published_at)}
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-soft-border" />
+                  <span className="text-[11px] text-muted-gray" style={{ fontFamily: "var(--font-sans)" }}>
+                    Sefer {item.sefer}
+                  </span>
+                  {item.media_url && (
+                    <>
+                      <span className="w-1 h-1 rounded-full bg-soft-border" />
+                      <span className="material-symbols-outlined text-parchment-gold" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>play_circle</span>
+                    </>
+                  )}
                 </div>
-              </article>
-            ))
-          )}
-        </div>
-      </section>
-      <footer className="border-t border-cloud-gray py-6 px-4">
-        <div className="max-w-[980px] mx-auto text-center">
-          <p className="text-xs text-light-slate">The Rambam Experience</p>
-        </div>
-      </footer>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

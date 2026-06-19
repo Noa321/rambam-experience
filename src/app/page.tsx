@@ -2,7 +2,6 @@ import { getSupabase } from "@/lib/supabase";
 import { books } from "@/data/books";
 import Link from "next/link";
 import Header from "@/components/Header";
-import BottomNav from "@/components/BottomNav";
 
 export const dynamic = "force-dynamic";
 
@@ -119,7 +118,6 @@ const ALIASES: Record<string, string> = {
 };
 for (const [alias, id] of Object.entries(ALIASES)) { HILCHOT_TO_TREATISE[alias] = id; }
 
-/* Sefaria URL names for Mishneh Torah treatises */
 const SEFARIA_NAMES: Record<string, string> = {
   "foundations": "Foundations_of_the_Torah",
   "dispositions": "Human_Dispositions",
@@ -193,7 +191,7 @@ export default async function Home() {
   const todayChapters = today ? parseChaptersFromContent(today.rambam_chapters, today.hilchot, today.sefer) : [];
 
   return (
-    <div className="min-h-screen pb-28" style={{ backgroundColor: "rgb(253, 251, 247)" }}>
+    <div className="min-h-screen pb-28">
       <Header />
 
       <main className="max-w-[800px] mx-auto px-5 mt-6">
@@ -239,8 +237,8 @@ export default async function Home() {
                       <span className="material-symbols-outlined text-primary" style={{ fontSize: "20px" }}>article</span>
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-semibold text-charcoal-text">Read the Essay</h3>
-                      <p className="text-[13px] text-muted-gray">Deep dive into the full d&#39;var Torah</p>
+                      <h3 className="text-[15px] font-semibold text-charcoal-text">{today.title}</h3>
+                      <p className="text-[13px] text-muted-gray">Read the Essay</p>
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
@@ -256,8 +254,8 @@ export default async function Home() {
                         <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#362308" }}>headset</span>
                       </div>
                       <div>
-                        <h3 className="text-[15px] font-semibold text-charcoal-text">Listen</h3>
-                        <p className="text-[13px] text-muted-gray">A spoken talk on today&#39;s themes</p>
+                        <h3 className="text-[15px] font-semibold text-charcoal-text">Listen to a Quick D&#39;var Torah</h3>
+                        <p className="text-[13px] text-muted-gray">On today&#39;s chapters</p>
                       </div>
                     </div>
                     <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
@@ -287,7 +285,7 @@ export default async function Home() {
                     </div>
                     <div>
                       <h3 className="text-[15px] font-semibold text-charcoal-text">One Page Summary</h3>
-                      <p className="text-[13px] text-muted-gray">A structured overview of the text</p>
+                      <p className="text-[13px] text-muted-gray">On today&#39;s 3 chapters</p>
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
@@ -295,11 +293,11 @@ export default async function Home() {
               </div>
             </section>
 
-            {/* Chapters Section -- links to study reader, Sefaria on hover */}
+            {/* Today's Chapters */}
             {todayChapters.length > 0 && (
               <section className="mb-8">
                 <h3 className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-3" style={{ fontFamily: "var(--font-sans)" }}>
-                  CHAPTERS
+                  TODAY&#39;S CHAPTERS
                 </h3>
                 <div className="bg-white rounded-[20px] border border-soft-border divide-y divide-soft-border overflow-hidden">
                   {todayChapters.map((ch) => (
@@ -308,7 +306,7 @@ export default async function Home() {
                         href={`/study/${ch.treatiseId}/${ch.chapter}`}
                         className="flex-1 p-4 hover:bg-surface-container-low transition-colors"
                       >
-                        <span className="text-[15px]">Chapter {ch.chapter}</span>
+                        <span className="text-[15px] text-charcoal-text">{ch.treatiseName} Chapter {ch.chapter}</span>
                       </Link>
                       <a
                         href={ch.sefariaUrl}
@@ -375,8 +373,6 @@ export default async function Home() {
           </section>
         )}
       </main>
-
-      <BottomNav />
     </div>
   );
 }
