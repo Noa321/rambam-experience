@@ -370,26 +370,39 @@ async function writeOnePager(sourceText, info) {
   const chaptersDesc = info.segments
     .map((s) => `${s.hilchotDisplayName} ${s.chapters.join(', ')}`)
     .join('; ');
-  const prompt = `You are writing a One-Page Learn — a concise study overview — for The Rambam Experience. Today's chapters: ${chaptersDesc}.
+  const prompt = `You are creating a One-Page Learn — a structured visual study overview — for The Rambam Experience. Today's chapters: ${chaptersDesc}, from Maimonides' Mishneh Torah, Sefer ${info.sefer}.
 
 Source text:
 ${sourceText}
 
-Return ONLY valid JSON (no markdown fence, no prose) with this exact shape:
+Return ONLY valid JSON (no markdown fence, no prose) with this EXACT shape:
 {
-  "subtitle": "one short sentence capturing the day's core idea",
-  "one_idea": "2-3 sentences naming the single unifying idea across the chapters",
+  "subtitle": "one evocative sentence capturing the day's unifying idea",
+  "one_idea": "5-7 sentences naming the single arc across all the chapters; give each chapter a one-word theme and show how they connect",
   "chapters": [
-    {"label": "CH 8", "heading": "short evocative heading", "bullets": ["sentence", "sentence"]}
+    {
+      "label": "CH 8",
+      "theme": "Attention",
+      "question": "What makes a thing holy?",
+      "heading": "short evocative title",
+      "bullets": [
+        {"lead": "short bold lead phrase", "text": "one or two sentences of explanation"}
+      ]
+    }
   ],
-  "spark": "one sharp Chassidic insight (1-2 sentences)",
-  "practical": "one concrete thing to do or reflect on today (1-2 sentences)",
-  "sources": "Mishneh Torah, <treatise(s) and chapters>."
+  "spark": "one paragraph on what is surprising or counterintuitive about these laws (2-3 sentences)",
+  "chas": "one paragraph with 1-2 Chassidic sources (Alter Rebbe/Tanya, Baal Shem Tov, Lubavitcher Rebbe) that illuminate the deeper meaning",
+  "society": "one paragraph applying the teaching to modern life (2-3 sentences)",
+  "live": ["a principle that applies now", "another", "another"],
+  "historical": ["a law specific to Temple times", "another", "another"],
+  "memory_hook": "a short, memorable phrase (shown in quotes)",
+  "takeaway": "2-3 sentences of practical takeaway",
+  "sources": "Mishneh Torah, <treatises and chapters>; <1-2 Chassidic sources>."
 }
 
-Rules: one chapters[] entry per chapter learned today (use the real chapter numbers and treatise context in the label, e.g. "CH 8" or "First Fruits 1"); 2 bullets each; no markdown, no asterisks, no emojis; plain transliteration for Hebrew terms.`;
+Rules: exactly one chapters[] entry per chapter learned today, in order; use the real chapter label and treatise context (e.g. "CH 8", or for transition days "M.S. 11", "F.F. 1"); each chapter needs a single-word "theme" and a short "question" of 2-4 words it answers; EXACTLY 4 bullets per chapter, each an object with a short "lead" and a 1-2 sentence "text"; 3-4 items each in live and historical; no markdown, no asterisks, no emojis; use plain English transliteration for Hebrew terms.`;
 
-  const res = await anthropic.messages.create({ model: MODEL, max_tokens: 2048, messages: [{ role: 'user', content: prompt }] });
+  const res = await anthropic.messages.create({ model: MODEL, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] });
   let text = res.content[0].text.trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('One-pager: no JSON found');
@@ -400,13 +413,66 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function wrap2(text, maxLen = 15) {
+  const words = String(text || '').split(/\s+/);
+  const lines = ['', ''];
+  let i = 0;
+  for (const w of words) {
+    if (i === 0 && (lines[0] + ' ' + w).trim().length > maxLen && lines[0]) i = 1;
+    lines[i] = (lines[i] + ' ' + w).trim();
+  }
+  return lines;
+}
+
+function svgDiagram(chapters) {
+  const palette = [
+    { stroke: '#B8860B', fill: '#F7F1E6' },
+    { stroke: '#735C00', fill: '#F3F3F5' },
+    { stroke: '#162839', fill: '#F3F3F5' },
+  ];
+  const xs = [6, 178, 326];
+  const cx = [75, 247, 395];
+  const list = (chapters || []).slice(0, 3);
+  let boxes = '';
+  list.forEach((c, i) => {
+    const p = palette[i % 3];
+    const [q1, q2] = wrap2(c.question || '', 15);
+    boxes += `<rect x="${xs[i]}" y="12" width="138" height="108" rx="9" fill="${p.fill}" stroke="${p.stroke}" stroke-width="1.5"/>
+<text x="${cx[i]}" y="36" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" letter-spacing="1" fill="${p.stroke}">${esc((c.label || '').toUpperCase())}</text>
+<text x="${cx[i]}" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="15" font-weight="600" fill="#162839">${esc(c.theme || '')}</text>
+<text x="${cx[i]}" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#86868B">${esc(q1)}</text>
+<text x="${cx[i]}" y="95" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#86868B">${esc(q2)}</text>`;
+    if (i < list.length - 1) {
+      const lx = xs[i] + 142;
+      boxes += `<line x1="${lx}" y1="66" x2="${lx + 18}" y2="66" stroke="#E5E5E7" stroke-width="2"/><polygon points="${lx + 18},61 ${lx + 28},66 ${lx + 18},71" fill="#E5E5E7"/>`;
+    }
+  });
+  const themes = list.map((c) => esc(c.theme || '')).join(' &rarr; ');
+  return `<figure class="figure"><svg viewBox="0 0 470 134" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${list.map((c) => esc(c.theme || '')).join(', ')}">${boxes}</svg><figcaption>${themes}</figcaption></figure>`;
+}
+
 function buildLearnHTML(op, info) {
   const tabClasses = ['tab-ch1', 'tab-ch2', 'tab-ch3'];
   const spineClasses = ['ch1', 'ch2', 'ch3'];
   const chapters = (op.chapters || []).map((c, i) => {
-    const lis = (c.bullets || []).map((b) => `<li>${esc(b)}</li>`).join('');
+    const lis = (c.bullets || []).map((b) => {
+      if (b && typeof b === 'object') return `<li><strong>${esc(b.lead)}.</strong> ${esc(b.text)}</li>`;
+      return `<li>${esc(b)}</li>`;
+    }).join('');
     return `<h2><span class="tab ${tabClasses[i % 3]}">${esc(c.label)}</span> ${esc(c.heading)}</h2>\n<ul class="spine-list ${spineClasses[i % 3]}">${lis}</ul>`;
   }).join('\n');
+
+  const listItems = (arr) => (arr || []).map((x) => `<li>${esc(x)}</li>`).join('');
+  const band = (op.live || op.historical)
+    ? `<h2><span class="tab tab-frame">Then &amp; Now</span> Live vs. historical</h2>
+<div class="band">
+<div class="col live"><h4>Alive Today</h4><ul>${listItems(op.live)}</ul></div>
+<div class="col hist"><h4>Historical / Awaiting the Temple</h4><ul>${listItems(op.historical)}</ul></div>
+</div>`
+    : '';
+  const memory = (op.memory_hook || op.takeaway)
+    ? `<div class="box practical"><span class="box-title">Memory Hook &amp; Takeaway</span><strong>&ldquo;${esc(op.memory_hook || '')}&rdquo;</strong>${esc(op.takeaway || '')}</div>`
+    : '';
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body>
 <div class="page">
@@ -416,12 +482,17 @@ function buildLearnHTML(op, info) {
 <div class="subtitle">${esc(op.subtitle || '')}</div>
 <div class="meta">Sefer ${esc(info.sefer)} &middot; ${esc(info.chaptersLabel)}</div>
 </div>
-<div class="lede"><strong>What this is:</strong> A one-page overview of today's Rambam chapters &mdash; the core halachos, the one unifying idea, and what it means for us now. For study, not for ruling.</div>
+<div class="lede"><strong>What this is:</strong> A one-page overview of today's Rambam chapters &mdash; the core halachos, the single idea that binds them, and how it lands now. For study, not for ruling.</div>
 <h2><span class="tab tab-frame">Frame</span> The one idea</h2>
 <p class="frame-text">${esc(op.one_idea || '')}</p>
+${svgDiagram(op.chapters || [])}
 ${chapters}
-<div class="box spark"><span class="box-title">The Spark</span>${esc(op.spark || '')}</div>
-<div class="box practical"><span class="box-title">For Today</span>${esc(op.practical || '')}</div>
+${op.spark ? `<div class="box spark"><span class="box-title">Why This Is Striking</span>${esc(op.spark)}</div>` : ''}
+${op.chas ? `<div class="box chas"><span class="box-title">A Chassidus Lens</span>${esc(op.chas)}</div>` : ''}
+${op.society ? `<div class="box society"><span class="box-title">How It Lands Today</span>${esc(op.society)}</div>` : ''}
+${band}
+${memory}
+<div class="box warn"><span class="box-title">One Caution</span>This is a study overview, not a halachic ruling. These laws are detailed and apply chiefly within Eretz Yisrael or while the Temple stands; consult a competent rav for practical questions.</div>
 <div class="endmark">&#9670; &#9670; &#9670;</div>
 <div class="sources">${esc(op.sources || '')}</div>
 </div>
