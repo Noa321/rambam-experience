@@ -319,6 +319,23 @@ export default async function Home() {
                   </div>
                   <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
                 </Link>
+
+                <Link
+                  href="/game"
+                  className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-soft-border hover:bg-surface-container-low transition-colors active:scale-[0.99]"
+                  style={{ borderLeft: "3px solid #B8860B" }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: "#e8d5f5" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#6b21a8" }}>quiz</span>
+                    </div>
+                    <div>
+                      <h3 className="text-[15px] font-semibold text-charcoal-text">The Rambam Riddle</h3>
+                      <p className="text-[13px] text-muted-gray">Test your knowledge</p>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>
+                </Link>
               </div>
             </section>
 
