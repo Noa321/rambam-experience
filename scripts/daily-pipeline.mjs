@@ -1,8 +1,13 @@
 #!/usr/bin/env node
-// Daily Rambam Pipeline — Fully Automated GitHub Actions Version
-// Fetches today's chapters from Sefaria, writes d'var Torah + spoken talk via Claude,
-// converts to branded HTML, publishes to Supabase, generates MP3 via OpenAI TTS,
-// uploads audio, and links everything together.
+// Daily Rambam Pipeline — self-running, catch-up, transition-day safe.
+// For each missing day (last published → today) it: resolves the day's chapters
+// from Sefaria (handling treatise-transition days that span two hilchot), pulls
+// source text, writes a d'var Torah + spoken talk + One-Page Learn via Claude,
+// publishes to Supabase, generates MP3 via OpenAI TTS, and uploads everything.
+//
+// Resilience: each day runs independently (one failure never aborts the rest),
+// and the One-Page Learn step is non-blocking (a failure there still ships the
+// essay + audio).
 
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
@@ -16,6 +21,9 @@ const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 if (!ANTHROPIC_KEY) throw new Error('Missing ANTHROPIC_API_KEY');
 if (!OPENAI_KEY) throw new Error('Missing OPENAI_API_KEY');
 if (!SUPABASE_KEY) throw new Error('Missing SUPABASE_ANON_KEY');
+
+const MODEL = 'claude-sonnet-4-5-20250929';
+const MAX_CATCHUP_DAYS = 10;
 
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_KEY });
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -42,13 +50,15 @@ const SEFER_MAP = {
   'Ritual Slaughter': 'Kedushah',
   'Oaths': "Hafla'ah", 'Vows': "Hafla'ah", 'Naziriteship': "Hafla'ah",
   'Valuations and Devoted Property': "Hafla'ah",
-  'Diverse Kinds': "Zera'im", 'Gifts to the Poor': "Zera'im",
+  'Diverse Species': "Zera'im", 'Diverse Kinds': "Zera'im", 'Gifts to the Poor': "Zera'im",
   'Heave Offerings': "Zera'im", 'Tithes': "Zera'im",
-  'Second Tithes and Fourth Year Produce': "Zera'im",
+  "Second Tithes and Fourth Year's Fruit": "Zera'im", 'Second Tithes and Fourth Year Produce': "Zera'im",
   'First Fruits and other Gifts to Priests Outside the Sanctuary': "Zera'im",
   'Sabbatical Year and the Jubilee': "Zera'im",
   'The Chosen Temple': 'Avodah', 'Temple Vessels and Servants': 'Avodah',
-  'Entering the Temple': 'Avodah', 'Things Forbidden on the Altar': 'Avodah',
+  'Vessels of the Sanctuary': 'Avodah',
+  'Entering the Temple': 'Avodah', 'Admission into the Sanctuary': 'Avodah',
+  'Things Forbidden on the Altar': 'Avodah',
   'Sacrificial Procedure': 'Avodah', 'Daily Offerings and Additional Offerings': 'Avodah',
   'Sacrifices Rendered Unfit': 'Avodah', 'Service on the Day of Atonement': 'Avodah',
   'Trespass': 'Avodah',
@@ -56,23 +66,12 @@ const SEFER_MAP = {
   'Firstlings': 'Korbanot', 'Offerings for Unintentional Transgressions': 'Korbanot',
   'Offerings for Those with Incomplete Atonement': 'Korbanot',
   'Substitution': 'Korbanot',
-  'Impurity of the Dead': 'Taharah', 'Red Heifer': 'Taharah',
-  'Impurity of Leprosy': 'Taharah', 'Those Who Render Couch and Seat Impure': 'Taharah',
-  'Other Sources of Impurity': 'Taharah', 'Impurity of Foods': 'Taharah',
-  'Vessels': 'Taharah', 'Immersion Pools': 'Taharah',
-  'Property Damage': 'Nezikim', 'Theft': 'Nezikim', 'Robbery and Lost Property': 'Nezikim',
-  'One Who Injures a Person or Property': 'Nezikim', 'Murderer and the Preservation of Life': 'Nezikim',
-  'Sales': 'Kinyan', 'Ownerless Property and Gifts': 'Kinyan',
-  'Neighbors': 'Kinyan', 'Agents and Partners': 'Kinyan', 'Slaves': 'Kinyan',
-  'Hiring': 'Mishpatim', 'Borrowing and Deposit': 'Mishpatim',
-  'Creditor and Debtor': 'Mishpatim', 'Plaintiff and Defendant': 'Mishpatim',
-  'Inheritance': 'Mishpatim',
-  'Sanhedrin and the Penalties within their Jurisdiction': 'Shoftim',
-  'Testimony': 'Shoftim', 'Rebels': 'Shoftim', 'Mourning': 'Shoftim',
-  'Kings and Wars': 'Shoftim',
 };
 
-// ─── Hilchot display name → short name for rambam_chapters field ───
+// ─── Hilchot display name → short, app-resolvable name for the rambam_chapters field.
+// These short names must match a treatise name or alias the web app understands
+// (src/data/books.ts names + src/lib/cycle.ts aliases), so chapters link and the
+// journey position resolves. Keep this in sync as the cycle reaches new treatises. ───
 const SHORT_NAMES = {
   'Marriage': 'Ishut', 'Divorce': 'Gerushin',
   'Sabbath': 'Shabbat', 'Eruvin': 'Eruvin',
@@ -100,112 +99,126 @@ const SHORT_NAMES = {
   'Levirate Marriage and Release': 'Yibbum v\'Chalitzah',
   'Virgin Maiden': 'Na\'arah Betulah',
   'Woman Suspected of Infidelity': 'Sotah',
+  // Zera'im (current cycle) — map long Sefaria names to app-resolvable short names
+  'Diverse Species': 'Diverse Species', 'Diverse Kinds': 'Diverse Species',
+  'Gifts to the Poor': 'Gifts to the Poor',
+  'Heave Offerings': 'Heave Offerings',
+  'Tithes': 'Maaser',
+  "Second Tithes and Fourth Year's Fruit": 'Maaser Sheini',
+  'Second Tithes and Fourth Year Produce': 'Maaser Sheini',
+  'First Fruits and other Gifts to Priests Outside the Sanctuary': 'First Fruits',
+  'Sabbatical Year and the Jubilee': 'Sabbatical',
 };
 
-// ─── Step 0: Determine today's chapters ───
-async function getTodaysChapters() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-  const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+// Hebrew title for the One-Page Learn cover, by short name (best-effort; falls back to English)
+const HE_NAMES = {
+  'Maaser Sheini': 'הִלְכוֹת מַעֲשֵׂר שֵׁנִי',
+  'First Fruits': 'הִלְכוֹת בִּכּוּרִים',
+  'Maaser': 'הִלְכוֹת מַעֲשְׂרוֹת',
+  'Heave Offerings': 'הִלְכוֹת תְּרוּמוֹת',
+  'Gifts to the Poor': 'הִלְכוֹת מַתְּנוֹת עֲנִיִּים',
+  'Diverse Species': 'הִלְכוֹת כִּלְאַיִם',
+  'Sabbatical': 'הִלְכוֹת שְׁמִיטָּה וְיוֹבֵל',
+};
 
-  console.log(`Fetching Rambam chapters for ${dateStr}...`);
+const easternDate = (offsetDays = 0) => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + offsetDays);
+  return d.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+};
 
+function deriveSlug(chaptersLabel) {
+  return chaptersLabel.toLowerCase().replace(/,\s*/g, '-').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+// ─── Step 0: Resolve a date's chapters (transition-day safe) ───
+async function getDayInfo(dateStr) {
+  const [year, month, day] = dateStr.split('-').map(Number);
   const res = await fetch(`https://www.sefaria.org/api/calendars?year=${year}&month=${month}&day=${day}`);
   if (!res.ok) throw new Error(`Sefaria calendar API failed: ${res.status}`);
   const data = await res.json();
 
-  const rambamItem = data.calendar_items.find(item => {
+  // A normal day has ONE "Daily Rambam (3 Chapters)" item; a treatise-transition
+  // day has TWO (e.g. "Second Tithes 11" + "First Fruits 1-2"). Collect them all.
+  const items = (data.calendar_items || []).filter((item) => {
     const title = JSON.stringify(item.title || {});
     return title.includes('Rambam') && title.includes('3');
   });
+  if (items.length === 0) throw new Error(`No Daily Rambam (3 chapters) for ${dateStr}`);
 
-  if (!rambamItem) throw new Error('Could not find Daily Rambam (3 chapters) in Sefaria calendar');
+  const segments = [];
+  for (const item of items) {
+    const ref = item.ref || '';
+    const m = ref.match(/^Mishneh Torah,\s*(.+?)\s+(\d+(?:-\d+)?)$/);
+    if (!m) throw new Error(`Cannot parse Sefaria ref: ${ref}`);
+    const hilchotDisplayName = m[1];
+    const rangeStr = m[2];
+    const [start, end] = rangeStr.includes('-') ? rangeStr.split('-').map(Number) : [Number(rangeStr), Number(rangeStr)];
+    const chapters = [];
+    for (let i = start; i <= end; i++) chapters.push(i);
+    segments.push({
+      hilchotDisplayName,
+      shortName: SHORT_NAMES[hilchotDisplayName] || hilchotDisplayName,
+      sefer: SEFER_MAP[hilchotDisplayName] || 'Unknown',
+      rangeStr,
+      chapters,
+      apiName: `Mishneh_Torah,_${hilchotDisplayName.replace(/ /g, '_')}`,
+    });
+  }
 
-  const displayValue = rambamItem.displayValue?.en || '';
-  const ref = rambamItem.ref || '';
-
-  console.log(`  Display: ${displayValue}`);
-  console.log(`  Ref: ${ref}`);
-
-  // Parse ref: "Mishneh Torah, Marriage 14-16"
-  const refMatch = ref.match(/^Mishneh Torah,\s*(.+?)\s+(\d+(?:-\d+)?)$/);
-  if (!refMatch) throw new Error(`Cannot parse Sefaria ref: ${ref}`);
-
-  const hilchotDisplayName = refMatch[1];
-  const rangeStr = refMatch[2];
-
-  const [start, end] = rangeStr.includes('-')
-    ? rangeStr.split('-').map(Number)
-    : [Number(rangeStr), Number(rangeStr)];
-
-  const chapters = [];
-  for (let i = start; i <= end; i++) chapters.push(i);
-
-  const sefer = SEFER_MAP[hilchotDisplayName] || 'Unknown';
-  const shortName = SHORT_NAMES[hilchotDisplayName] || hilchotDisplayName;
-  const chaptersLabel = `${shortName} ${rangeStr}`;
-  const slug = `${shortName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${rangeStr}`;
-
-  // Build Sefaria API path for text fetching
-  const apiName = `Mishneh_Torah,_${hilchotDisplayName.replace(/ /g, '_')}`;
+  const chaptersLabel = segments.map((s) => `${s.shortName} ${s.rangeStr}`).join(', ');
+  const last = segments[segments.length - 1]; // the treatise the day lands in
+  const allChapterNumbers = segments.flatMap((s) => s.chapters);
 
   return {
     dateStr,
-    hilchotDisplayName,
-    shortName,
-    sefer,
-    chapters,
+    segments,
     chaptersLabel,
-    slug,
-    apiName,
+    slug: deriveSlug(chaptersLabel),
+    sefer: last.sefer,
+    shortName: last.shortName,
+    heName: HE_NAMES[last.shortName] || '',
+    chapterNumbers: allChapterNumbers,
   };
 }
 
-// ─── Step 1: Fetch source text from Sefaria ───
+// ─── Step 1: Fetch source text (all segments) ───
 async function fetchSourceText(info) {
-  console.log(`Fetching ${info.chapters.length} chapters from Sefaria...`);
-
-  const texts = [];
-  for (const ch of info.chapters) {
-    const url = `https://www.sefaria.org/api/v3/texts/${info.apiName}.${ch}?version=english`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Sefaria text API failed for ch ${ch}: ${res.status}`);
-    const data = await res.json();
-    const raw = data.versions?.[0]?.text;
-    if (!raw) throw new Error(`No text found for ${info.apiName}.${ch}`);
-
-    const flatten = (arr) => arr.map(v => Array.isArray(v) ? flatten(v) : v).join('\n');
-    const text = flatten(raw).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\n{3,}/g, '\n\n');
-    texts.push({ chapter: ch, text });
-    console.log(`  Chapter ${ch}: ${text.length} chars`);
+  const parts = [];
+  for (const seg of info.segments) {
+    for (const ch of seg.chapters) {
+      const url = `https://www.sefaria.org/api/v3/texts/${seg.apiName}.${ch}?version=english`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Sefaria text API failed for ${seg.apiName} ch.${ch}: ${res.status}`);
+      const data = await res.json();
+      const raw = data.versions?.[0]?.text;
+      if (!raw) throw new Error(`No text for ${seg.apiName}.${ch}`);
+      const flatten = (arr) => arr.map((v) => (Array.isArray(v) ? flatten(v) : v)).join('\n');
+      const text = flatten(raw).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\n{3,}/g, '\n\n');
+      parts.push(`## ${seg.hilchotDisplayName}, Chapter ${ch}\n\n${text}`);
+    }
   }
-
-  const combined = texts.map(t => `## CHAPTER ${t.chapter}\n\n${t.text}`).join('\n\n');
-  return combined;
+  return parts.join('\n\n');
 }
 
 // ─── Step 2: Check for duplicates ───
-async function checkDuplicate(info) {
+async function alreadyPublished(dateStr) {
   const { data } = await supabase
     .from('content')
-    .select('id,rambam_chapters')
+    .select('id')
     .eq('content_type', 'dvar_torah')
-    .eq('rambam_date', info.dateStr)
+    .eq('rambam_date', dateStr)
     .limit(1);
-  if (data && data.length > 0) {
-    console.log(`Already published for ${info.dateStr}: ${data[0].rambam_chapters}. Skipping.`);
-    return true;
-  }
-  return false;
+  return !!(data && data.length > 0);
 }
 
-// ─── Step 2: Write d'var Torah + spoken talk via Claude ───
+// ─── Step 3: Write d'var Torah + spoken talk via Claude ───
 async function writeContent(sourceText, info) {
-  console.log('Writing d\'var Torah via Claude...');
+  const chaptersDesc = info.segments
+    .map((s) => `Hilchot ${s.hilchotDisplayName} chapter${s.chapters.length > 1 ? 's' : ''} ${s.chapters.join(', ')}`)
+    .join('; and ');
 
-  const dvarPrompt = `You are writing a d'var Torah for The Rambam Experience — a daily Torah content platform. Today's chapters are Hilchot ${info.hilchotDisplayName} chapters ${info.chapters.join(', ')} from Maimonides' Mishneh Torah.
+  const dvarPrompt = `You are writing a d'var Torah for The Rambam Experience — a daily Torah content platform. Today's learning is: ${chaptersDesc} from Maimonides' Mishneh Torah.
 
 Here is the source text:
 
@@ -214,7 +227,7 @@ ${sourceText}
 CRITICAL OUTPUT FORMAT:
 - ABSOLUTELY NO MARKDOWN FORMATTING in the prose body. No asterisks for bold. No underscores for italics. No bullet points. No numbered lists.
 - The ONLY markdown allowed: a YAML frontmatter block at the top (between --- and ---) and h2 headings (## SECTION NAME).
-- Section headings: SHORT, ALL CAPS like "## THE HOOK" or "## CHAPTER ${info.chapters[0]}"
+- Section headings: SHORT, ALL CAPS, optionally with a subtitle after a colon, e.g. "## THE HOOK" or "## CHAPTER 8: When Money Becomes Sacred".
 - When citing Chassidic sources, weave them naturally into prose. No parenthetical citations.
 
 Required YAML frontmatter:
@@ -228,11 +241,9 @@ hilchot: "${info.shortName}"
 tags: ["rambam", ...]
 ---
 
-Required sections:
+Required sections, in order:
 ## THE HOOK
-## CHAPTER ${info.chapters[0]}: [evocative subtitle]
-## CHAPTER ${info.chapters[1]}: [evocative subtitle]
-${info.chapters[2] ? `## CHAPTER ${info.chapters[2]}: [evocative subtitle]` : ''}
+Then one section per chapter being learned today (label each with the chapter and an evocative subtitle; cover every chapter listed above, in order).
 ## THE UNIFYING PRINCIPLE
 ## MODERN APPLICATION
 ## THE CLOSING
@@ -247,7 +258,7 @@ NEVER: emojis, bullet points, numbered lists, generic ethics, opening with "So" 
 
 Write the complete d'var Torah now.`;
 
-  const talkPrompt = `You are writing a spoken talk for The Rambam Experience — a daily Torah audio platform. Today's chapters are Hilchot ${info.hilchotDisplayName} chapters ${info.chapters.join(', ')} from Maimonides' Mishneh Torah.
+  const talkPrompt = `You are writing a spoken talk for The Rambam Experience — a daily Torah audio platform. Today's learning is: ${chaptersDesc} from Maimonides' Mishneh Torah.
 
 Here is the source text:
 
@@ -256,6 +267,7 @@ ${sourceText}
 CRITICAL OUTPUT FORMAT:
 - ABSOLUTELY NO MARKDOWN. NO frontmatter. NO headings. NO asterisks. NO underscores. NO bullet points. NO numbered lists. NO horizontal dividers (---). NO blockquotes.
 - Pure flowing narrative prose with paragraph breaks only. The ENTIRE output will be read aloud by text-to-speech. ANY symbol that isn't normal punctuation will be spoken or cause a glitch.
+- Write Hebrew/Aramaic terms in plain transliteration (e.g. Rambam, halacha, mitzvot, Maaser Sheini) — never Hebrew letters or phonetic respellings.
 - Do NOT begin with a title line. Start straight into the talk.
 
 VOICE: Late-night farbrengen. Manis Friedman. Warm, intimate, contemplative, slightly amused, profound. Use "you" and "I". Rhetorical questions. Allow pauses (paragraph breaks).
@@ -274,180 +286,63 @@ NEVER: "journey", "at the end of the day", opening with "So" or "Today we're goi
 
 Write the complete spoken talk now.`;
 
-  // Run both in parallel
   const [dvarResult, talkResult] = await Promise.all([
-    anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: dvarPrompt }],
-    }),
-    anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: talkPrompt }],
-    }),
+    anthropic.messages.create({ model: MODEL, max_tokens: 4096, messages: [{ role: 'user', content: dvarPrompt }] }),
+    anthropic.messages.create({ model: MODEL, max_tokens: 2048, messages: [{ role: 'user', content: talkPrompt }] }),
   ]);
 
-  const dvarTorah = dvarResult.content[0].text;
-  const talk = talkResult.content[0].text;
-
-  console.log(`  D'var Torah: ${dvarTorah.length} chars`);
-  console.log(`  Talk: ${talk.length} chars`);
-
-  return { dvarTorah, talk };
+  return { dvarTorah: dvarResult.content[0].text, talk: talkResult.content[0].text };
 }
 
 // ─── Parse YAML frontmatter ───
 function parseFrontmatter(md) {
   const match = md.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
-  const yaml = match[1];
   const result = {};
-  for (const line of yaml.split('\n')) {
+  for (const line of match[1].split('\n')) {
     const m = line.match(/^(\w+):\s*"?(.*?)"?\s*$/);
     if (m) result[m[1]] = m[2];
     const arrMatch = line.match(/^(\w+):\s*\[(.*)\]\s*$/);
-    if (arrMatch) {
-      result[arrMatch[1]] = arrMatch[2].split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
-    }
+    if (arrMatch) result[arrMatch[1]] = arrMatch[2].split(',').map((s) => s.trim().replace(/^["']|["']$/g, ''));
   }
   return result;
 }
 
-// ─── Step 3: Convert d'var Torah to branded HTML ───
-function buildHTML(dvarTorah, info) {
-  console.log('Converting to branded HTML...');
-
-  const meta = parseFrontmatter(dvarTorah);
-  const title = meta.title || info.chaptersLabel;
-  const hook = meta.hook || '';
-
-  // Strip frontmatter, then convert sections to HTML
+// ─── Step 4: Convert d'var Torah to clean article HTML (the app re-skins it) ───
+function buildArticleHTML(dvarTorah) {
   let body = dvarTorah.replace(/^---[\s\S]*?---\n*/, '');
-
-  // Process sections
-  const sections = body.split(/^## /m).filter(s => s.trim());
-  let articleHTML = '';
-  let isFirst = true;
-
+  const sections = body.split(/^## /m).filter((s) => s.trim());
+  let out = '<article>\n';
   for (const section of sections) {
     const lines = section.split('\n');
     const heading = lines[0].trim();
     const content = lines.slice(1).join('\n').trim();
-
-    // Parse heading: "THE HOOK" or "CHAPTER 14: The Weight of Status"
-    let sectionLabel, h2Title;
+    let label, title;
     if (heading.includes(':')) {
-      const [label, ...rest] = heading.split(':');
-      sectionLabel = label.trim();
-      h2Title = rest.join(':').trim();
+      const [l, ...rest] = heading.split(':');
+      label = l.trim();
+      title = rest.join(':').trim();
     } else {
-      sectionLabel = heading;
-      h2Title = heading.replace(/^THE\s+/, '');
+      label = heading;
+      title = heading.replace(/^THE\s+/i, '');
     }
-
-    // Add divider between sections (not before first)
-    if (!isFirst) {
-      articleHTML += '            <hr class="section-divider">\n';
-    }
-    isFirst = false;
-
-    articleHTML += `            <p class="section-label">${sectionLabel}</p>\n`;
-    articleHTML += `            <h2>${h2Title}</h2>\n\n`;
-
-    // Convert paragraphs
-    const paragraphs = content.split(/\n\n+/).filter(p => p.trim());
-    const isClosingSection = sectionLabel.includes('CLOSING');
-
+    out += `<p class="section-label">${label}</p>\n`;
+    if (title && title.toUpperCase() !== label.toUpperCase()) out += `<h2>${title}</h2>\n`;
+    const paragraphs = content.split(/\n\n+/).filter((p) => p.trim());
     for (let i = 0; i < paragraphs.length; i++) {
-      let p = paragraphs[i].trim()
-        .replace(/—/g, '&mdash;')
-        .replace(/"/g, '&ldquo;').replace(/"/g, '&rdquo;')
-        .replace(/'/g, '&rsquo;')
-        .replace(/é/g, '&eacute;')
-        .replace(/–/g, '&ndash;');
-
-      const isLast = isClosingSection && i === paragraphs.length - 1;
-      const cls = isLast ? ' class="closing-bold"' : '';
-      articleHTML += `            <p${cls}>${p}</p>\n\n`;
+      const isClosing = /CLOS/i.test(label) && i === paragraphs.length - 1;
+      const esc = paragraphs[i].trim()
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      out += `<p${isClosing ? ' class="closing-bold"' : ''}>${esc}</p>\n`;
     }
   }
-
-  const readingTime = Math.ceil(body.split(/\s+/).length / 200);
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Literata:ital@0;1&family=Noto+Serif+Hebrew:wght@400;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #2C3E50; --accent-red: #C0392B; --deep-red: #A93226;
-            --bg: #FAFAF8; --border-grey: #E2E2E2; --warm-grey: #718096;
-            --text-primary: #2A2A28; --text-secondary: #5A5A56;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Literata', serif; background-color: var(--bg); color: var(--text-primary); line-height: 1.7; font-size: 16px; }
-        .container { max-width: 760px; margin: 0 auto; padding: 40px 24px; }
-        header { display: flex; align-items: center; gap: 12px; margin-bottom: 48px; border-bottom: 2px solid var(--border-grey); padding-bottom: 24px; }
-        .material-symbols-outlined { font-size: 32px; color: var(--primary); font-variation-settings: 'FILL' 1; }
-        .site-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 600; color: var(--primary); letter-spacing: 0.5px; }
-        .article-header { margin-bottom: 48px; }
-        .title-block { margin-bottom: 24px; }
-        .title-block h1 { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 600; color: var(--primary); line-height: 1.3; margin-bottom: 16px; }
-        .subtitle { font-family: 'Literata', serif; font-size: 18px; color: var(--accent-red); font-style: italic; line-height: 1.6; }
-        .metadata { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--warm-grey); margin-top: 16px; display: flex; gap: 20px; flex-wrap: wrap; }
-        .metadata-item { display: flex; align-items: center; gap: 6px; }
-        article { margin-bottom: 48px; }
-        .section-label { font-family: 'DM Sans', sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-red); margin-bottom: 12px; margin-top: 32px; font-weight: 600; }
-        .section-divider { border: none; border-top: 1px solid var(--border-grey); margin: 40px 0 16px; }
-        article h2 { font-family: 'DM Sans', sans-serif; font-size: 24px; font-weight: 600; color: var(--primary); margin-bottom: 20px; margin-top: 8px; line-height: 1.35; }
-        article p { margin-bottom: 20px; font-size: 17px; line-height: 1.75; color: var(--text-primary); }
-        .pull-quote { font-family: 'Literata', serif; font-style: italic; font-size: 19px; color: var(--primary); border-left: 3px solid var(--accent-red); padding: 8px 0 8px 24px; margin: 32px 0; line-height: 1.6; }
-        .closing-bold { font-weight: 600; color: var(--primary); margin-top: 32px; padding-top: 24px; border-top: 2px solid var(--border-grey); }
-        footer { border-top: 2px solid var(--border-grey); padding-top: 24px; margin-top: 48px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--warm-grey); text-align: center; }
-        @media (max-width: 600px) {
-            .container { padding: 24px 16px; }
-            .title-block h1 { font-size: 24px; }
-            article h2 { font-size: 20px; }
-            .metadata { flex-direction: column; gap: 8px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <span class="material-symbols-outlined">auto_stories</span>
-            <div class="site-title">The Rambam / Experience</div>
-        </header>
-        <div class="article-header">
-            <div class="title-block">
-                <h1>${title}</h1>
-                <p class="subtitle">${hook}</p>
-            </div>
-            <div class="metadata">
-                <div class="metadata-item">${info.chaptersLabel}</div>
-                <div class="metadata-item">${readingTime} minutes</div>
-            </div>
-        </div>
-        <article>
-${articleHTML}
-        </article>
-        <footer>The Rambam Experience &middot; therambamexperience.com</footer>
-    </div>
-</body>
-</html>`;
+  out += '</article>';
+  return out;
 }
 
-// ─── Step 4: Publish to Supabase ───
+// ─── Step 5: Publish to Supabase ───
 async function publishToSupabase(html, dvarTorah, info) {
-  console.log('Publishing to Supabase...');
-
   const meta = parseFrontmatter(dvarTorah);
-
   const record = {
     title: meta.title || info.chaptersLabel,
     content_type: 'dvar_torah',
@@ -458,39 +353,99 @@ async function publishToSupabase(html, dvarTorah, info) {
     rambam_chapters: info.chaptersLabel,
     sefer: info.sefer,
     hilchot: info.shortName,
-    chapter_numbers: info.chapters,
+    chapter_numbers: info.chapterNumbers,
     rambam_date: info.dateStr,
     hook: meta.hook || '',
     summary: meta.summary || '',
     tags: meta.tags || ['rambam'],
-    published_at: new Date().toISOString(),
+    published_at: `${info.dateStr}T11:00:00+00:00`,
   };
-
-  const { data, error } = await supabase
-    .from('content')
-    .insert(record)
-    .select('id,title,published_at,rambam_chapters')
-    .single();
-
+  const { data, error } = await supabase.from('content').insert(record).select('id,title').single();
   if (error) throw new Error(`Supabase insert failed: ${JSON.stringify(error)}`);
-  console.log(`  Published: ${data.id} — ${data.title}`);
   return data.id;
 }
 
-// ─── Step 5: Generate MP3 via OpenAI TTS ───
+// ─── Step 6: One-Page Learn (non-blocking) ───
+async function writeOnePager(sourceText, info) {
+  const chaptersDesc = info.segments
+    .map((s) => `${s.hilchotDisplayName} ${s.chapters.join(', ')}`)
+    .join('; ');
+  const prompt = `You are writing a One-Page Learn — a concise study overview — for The Rambam Experience. Today's chapters: ${chaptersDesc}.
+
+Source text:
+${sourceText}
+
+Return ONLY valid JSON (no markdown fence, no prose) with this exact shape:
+{
+  "subtitle": "one short sentence capturing the day's core idea",
+  "one_idea": "2-3 sentences naming the single unifying idea across the chapters",
+  "chapters": [
+    {"label": "CH 8", "heading": "short evocative heading", "bullets": ["sentence", "sentence"]}
+  ],
+  "spark": "one sharp Chassidic insight (1-2 sentences)",
+  "practical": "one concrete thing to do or reflect on today (1-2 sentences)",
+  "sources": "Mishneh Torah, <treatise(s) and chapters>."
+}
+
+Rules: one chapters[] entry per chapter learned today (use the real chapter numbers and treatise context in the label, e.g. "CH 8" or "First Fruits 1"); 2 bullets each; no markdown, no asterisks, no emojis; plain transliteration for Hebrew terms.`;
+
+  const res = await anthropic.messages.create({ model: MODEL, max_tokens: 2048, messages: [{ role: 'user', content: prompt }] });
+  let text = res.content[0].text.trim();
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('One-pager: no JSON found');
+  return JSON.parse(jsonMatch[0]);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function buildLearnHTML(op, info) {
+  const tabClasses = ['tab-ch1', 'tab-ch2', 'tab-ch3'];
+  const spineClasses = ['ch1', 'ch2', 'ch3'];
+  const chapters = (op.chapters || []).map((c, i) => {
+    const lis = (c.bullets || []).map((b) => `<li>${esc(b)}</li>`).join('');
+    return `<h2><span class="tab ${tabClasses[i % 3]}">${esc(c.label)}</span> ${esc(c.heading)}</h2>\n<ul class="spine-list ${spineClasses[i % 3]}">${lis}</ul>`;
+  }).join('\n');
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body>
+<div class="page">
+<div class="cover">
+<div class="kicker">One-Page Learn &middot; Daily Rambam</div>
+<div class="he">${esc(info.heName)}</div>
+<div class="subtitle">${esc(op.subtitle || '')}</div>
+<div class="meta">Sefer ${esc(info.sefer)} &middot; ${esc(info.chaptersLabel)}</div>
+</div>
+<div class="lede"><strong>What this is:</strong> A one-page overview of today's Rambam chapters &mdash; the core halachos, the one unifying idea, and what it means for us now. For study, not for ruling.</div>
+<h2><span class="tab tab-frame">Frame</span> The one idea</h2>
+<p class="frame-text">${esc(op.one_idea || '')}</p>
+${chapters}
+<div class="box spark"><span class="box-title">The Spark</span>${esc(op.spark || '')}</div>
+<div class="box practical"><span class="box-title">For Today</span>${esc(op.practical || '')}</div>
+<div class="endmark">&#9670; &#9670; &#9670;</div>
+<div class="sources">${esc(op.sources || '')}</div>
+</div>
+</body></html>`;
+}
+
+async function uploadToMedia(objectPath, body, contentType) {
+  const { error } = await supabase.storage.from('media').upload(objectPath, body, { contentType, upsert: true });
+  if (error) throw new Error(`Storage upload failed (${objectPath}): ${JSON.stringify(error)}`);
+  return `${SUPABASE_URL}/storage/v1/object/public/media/${objectPath}`;
+}
+
+// ─── TTS helpers ───
 function cleanText(text) {
-  text = text.replace(/^---[\s\S]*?---\n*/m, '');
-  text = text.replace(/^#+\s*/gm, '');
-  text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
-  text = text.replace(/\*\*/g, '');
-  text = text.replace(/\*([^*]+)\*/g, '$1');
-  text = text.replace(/\*/g, '');
-  text = text.replace(/_([^_]+)_/g, '$1');
-  text = text.replace(/^>\s*/gm, '');
-  text = text.replace(/^---+$/gm, '');
-  text = text.replace(/^\*\*\*+$/gm, '');
-  text = text.replace(/\n{3,}/g, '\n\n');
-  return text.trim();
+  return text
+    .replace(/^---[\s\S]*?---\n*/m, '')
+    .replace(/^#+\s*/gm, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*\*/g, '')
+    .replace(/\*([^*]+)\*/g, '$1').replace(/\*/g, '')
+    .replace(/_([^_]+)_/g, '$1')
+    .replace(/^>\s*/gm, '')
+    .replace(/^---+$/gm, '').replace(/^\*\*\*+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function chunkText(text, max = 4000) {
@@ -502,112 +457,112 @@ function chunkText(text, max = 4000) {
     if ((current + '\n\n' + p).length > max && current) {
       chunks.push(current.trim());
       current = p;
-    } else {
-      current = current ? current + '\n\n' + p : p;
-    }
+    } else current = current ? current + '\n\n' + p : p;
   }
   if (current) chunks.push(current.trim());
   return chunks;
 }
 
 async function generateMP3(talkText) {
-  console.log('Generating MP3 via OpenAI TTS...');
-
   const cleaned = cleanText(talkText);
-  console.log(`  Cleaned text: ${cleaned.length} chars`);
-  console.log(`  First 100: ${cleaned.substring(0, 100)}...`);
-
   const chunks = chunkText(cleaned);
-  console.log(`  Chunks: ${chunks.length}`);
-
   const buffers = [];
   for (let i = 0; i < chunks.length; i++) {
-    console.log(`  Generating chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)...`);
     const res = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'tts-1-hd',
-        input: chunks[i],
-        voice: 'onyx',
-        speed: 0.95,
-      }),
+      headers: { Authorization: `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'tts-1-hd', input: chunks[i], voice: 'onyx', speed: 0.95 }),
     });
     if (!res.ok) throw new Error(`OpenAI TTS failed chunk ${i + 1}: ${await res.text()}`);
     buffers.push(Buffer.from(await res.arrayBuffer()));
-    console.log(`    -> ${buffers[i].length} bytes`);
   }
-
   return Buffer.concat(buffers);
 }
 
-// ─── Step 6: Upload MP3 + link to record ───
-async function uploadAndLink(mp3Buffer, slug, recordId) {
-  console.log('Uploading MP3 to Supabase storage...');
-
-  const filename = `talk-${slug}.mp3`;
-  const path = `talks/${filename}`;
-
-  const { error: uploadErr } = await supabase.storage
-    .from('media')
-    .upload(path, mp3Buffer, { contentType: 'audio/mpeg', upsert: true });
-
-  if (uploadErr) throw new Error(`Upload failed: ${JSON.stringify(uploadErr)}`);
-
-  const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
-  console.log(`  Uploaded: ${urlData.publicUrl}`);
-
-  const { error: updateErr } = await supabase
-    .from('content')
-    .update({ media_url: urlData.publicUrl, media_type: 'audio/mpeg' })
-    .eq('id', recordId);
-
-  if (updateErr) throw new Error(`Record update failed: ${JSON.stringify(updateErr)}`);
-  console.log('  Record linked to audio.');
-}
-
-// ─── Main ───
-async function main() {
-  console.log('=== Daily Rambam Pipeline ===\n');
-
-  // Step 0: Get today's chapters
-  const info = await getTodaysChapters();
-  console.log(`  Sefer: ${info.sefer}, Hilchot: ${info.shortName}, Chapters: ${info.chapters.join(', ')}\n`);
-
-  // Check for duplicates
-  if (await checkDuplicate(info)) {
-    console.log('Pipeline complete (already published).');
+// ─── Per-day orchestration ───
+async function processDay(dateStr) {
+  console.log(`\n=== ${dateStr} ===`);
+  if (await alreadyPublished(dateStr)) {
+    console.log('  already published — skipping');
     return;
   }
+  const info = await getDayInfo(dateStr);
+  console.log(`  ${info.chaptersLabel} (Sefer ${info.sefer})`);
 
-  // Step 1: Fetch source text
   const sourceText = await fetchSourceText(info);
-  console.log(`  Total source: ${sourceText.length} chars\n`);
-
-  // Step 2: Write content via Claude (parallel)
   const { dvarTorah, talk } = await writeContent(sourceText, info);
-
-  // Step 3: Convert to HTML
-  const html = buildHTML(dvarTorah, info);
-
-  // Step 4: Publish to Supabase
+  const html = buildArticleHTML(dvarTorah);
   const recordId = await publishToSupabase(html, dvarTorah, info);
+  console.log(`  published essay: ${recordId}`);
 
-  // Step 5: Generate MP3
-  const mp3 = await generateMP3(talk);
-  console.log(`  Total MP3: ${mp3.length} bytes\n`);
+  // Audio (best-effort: a TTS failure shouldn't unpublish the essay)
+  try {
+    const mp3 = await generateMP3(talk);
+    const url = await uploadToMedia(`talks/talk-${info.slug}.mp3`, mp3, 'audio/mpeg');
+    await supabase.from('content').update({ media_url: url, media_type: 'audio/mpeg' }).eq('id', recordId);
+    console.log('  audio linked');
+  } catch (err) {
+    console.error(`  AUDIO FAILED (${dateStr}): ${err.message}`);
+  }
 
-  // Step 6: Upload + link
-  await uploadAndLink(mp3, info.slug, recordId);
-
-  console.log('\n=== Pipeline complete! ===');
-  console.log(`  ${info.chaptersLabel} — published with audio.`);
+  // One-Page Learn (non-blocking)
+  try {
+    const op = await writeOnePager(sourceText, info);
+    const learnHtml = buildLearnHTML(op, info);
+    await uploadToMedia(`learns/learn-${info.slug}.html`, learnHtml, 'text/html; charset=utf-8');
+    console.log('  one-page learn uploaded');
+  } catch (err) {
+    console.error(`  ONE-PAGER FAILED (${dateStr}): ${err.message}`);
+  }
 }
 
-main().catch(err => {
+// ─── Main: catch up from last published date through today ───
+async function main() {
+  console.log('=== Daily Rambam Pipeline ===');
+
+  const { data: latest } = await supabase
+    .from('content')
+    .select('rambam_date')
+    .eq('content_type', 'dvar_torah')
+    .eq('status', 'published')
+    .not('rambam_date', 'is', null)
+    .lte('rambam_date', easternDate())
+    .order('rambam_date', { ascending: false })
+    .limit(1);
+
+  const today = easternDate();
+  const lastDate = latest && latest.length ? latest[0].rambam_date : easternDate(-1);
+  console.log(`Last published: ${lastDate}; today: ${today}`);
+
+  // Build the list of days to fill (lastDate+1 .. today), capped
+  const days = [];
+  const cursor = new Date(`${lastDate}T12:00:00Z`);
+  const end = new Date(`${today}T12:00:00Z`);
+  cursor.setUTCDate(cursor.getUTCDate() + 1);
+  while (cursor <= end && days.length < MAX_CATCHUP_DAYS) {
+    days.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  if (days.length === 0) {
+    console.log('Up to date — nothing to publish.');
+    return;
+  }
+  console.log(`Catching up ${days.length} day(s): ${days.join(', ')}`);
+
+  let ok = 0;
+  for (const day of days) {
+    try {
+      await processDay(day);
+      ok++;
+    } catch (err) {
+      console.error(`DAY FAILED (${day}): ${err.message}`);
+    }
+  }
+  console.log(`\n=== Done: ${ok}/${days.length} day(s) processed ===`);
+}
+
+main().catch((err) => {
   console.error('\nPIPELINE FAILED:', err.message);
   process.exit(1);
 });
