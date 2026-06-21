@@ -26,13 +26,16 @@ interface ContentRecord {
 async function getAllContent(): Promise<ContentRecord[]> {
   const supabase = getSupabase();
   const today = new Date().toISOString().split("T")[0];
+  // Show every published d'var Torah — including older essays that have no
+  // rambam_date (a plain `lte` filter silently excludes null dates). Still hide
+  // anything dated in the future. Undated essays sort to the end.
   const { data, error } = await supabase
     .from("content")
     .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
-    .lte("rambam_date", today)
-    .order("rambam_date", { ascending: false });
+    .or(`rambam_date.is.null,rambam_date.lte.${today}`)
+    .order("rambam_date", { ascending: false, nullsFirst: false });
   if (error || !data) return [];
   return data as ContentRecord[];
 }
@@ -69,10 +72,14 @@ export default async function ArchivePage() {
                 <h2 className="font-serif text-[17px] font-semibold text-primary mb-1 group-hover:text-parchment-gold transition-colors">{item.title}</h2>
                 {item.hook && <p className="text-[13px] text-muted-gray line-clamp-2 mb-1.5">{item.hook}</p>}
                 <div className="flex items-center gap-3">
-                  <span className="text-[11px] text-muted-gray" style={{ fontFamily: "var(--font-sans)" }}>
-                    {formatFullDate(item.rambam_date || item.published_at)}
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-soft-border" />
+                  {(item.rambam_date || item.published_at) && (
+                    <>
+                      <span className="text-[11px] text-muted-gray" style={{ fontFamily: "var(--font-sans)" }}>
+                        {formatFullDate(item.rambam_date || item.published_at)}
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-soft-border" />
+                    </>
+                  )}
                   <span className="text-[11px] text-muted-gray" style={{ fontFamily: "var(--font-sans)" }}>
                     Sefer {item.sefer}
                   </span>
