@@ -587,9 +587,44 @@ async function processDay(dateStr) {
   }
 }
 
+// ─── Credential preflight ───
+// Validates each secret with a cheap call and surfaces any failure as a GitHub
+// Actions ::error:: annotation (shown in the run's "Annotations" panel), so a
+// bad/missing secret is obvious without digging through the step log.
+async function preflight() {
+  console.log('Preflight: checking credentials...');
+  const problems = [];
+  try {
+    await anthropic.messages.create({ model: MODEL, max_tokens: 4, messages: [{ role: 'user', content: 'ping' }] });
+    console.log('  [ok] ANTHROPIC_API_KEY');
+  } catch (e) {
+    problems.push(`ANTHROPIC_API_KEY rejected by the Claude API (${e.status || ''} ${e.name || ''}): ${e.message}`);
+  }
+  try {
+    const r = await fetch('https://api.openai.com/v1/models', { headers: { Authorization: `Bearer ${OPENAI_KEY}` } });
+    if (!r.ok) throw new Error(`HTTP ${r.status} ${(await r.text()).slice(0, 120)}`);
+    console.log('  [ok] OPENAI_API_KEY');
+  } catch (e) {
+    problems.push(`OPENAI_API_KEY rejected by OpenAI: ${e.message}`);
+  }
+  try {
+    const { error } = await supabase.from('content').select('id').limit(1);
+    if (error) throw new Error(JSON.stringify(error));
+    console.log('  [ok] SUPABASE_URL + SUPABASE_ANON_KEY');
+  } catch (e) {
+    problems.push(`SUPABASE_URL / SUPABASE_ANON_KEY rejected by Supabase: ${e.message}`);
+  }
+  if (problems.length) {
+    for (const p of problems) console.log(`::error::${p}`);
+    throw new Error(`Preflight failed: ${problems.length} credential problem(s) — see the Annotations panel.`);
+  }
+  console.log('  preflight passed — all credentials valid');
+}
+
 // ─── Main: catch up from last published date through today ───
 async function main() {
   console.log('=== Daily Rambam Pipeline ===');
+  await preflight();
 
   const { data: latest } = await supabase
     .from('content')
