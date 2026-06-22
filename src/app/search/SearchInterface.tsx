@@ -208,7 +208,8 @@ export default function SearchInterface() {
                   PRIMARY SOURCE
                 </p>
                 <p className="text-[14px] font-semibold text-primary mb-1">
-                  Hilchot {result.primary_source.treatise}, Chapter {result.primary_source.chapter}
+                  Hilchot {result.primary_source.treatise.replace(/^\s*hilchot\s+/i, "")}, Chapter{" "}
+                  {result.primary_source.chapter}
                   {result.primary_source.halacha > 0 && `, Halacha ${result.primary_source.halacha}`}
                 </p>
                 <p className="font-serif text-[14px] leading-[22px] text-primary italic">
@@ -230,7 +231,7 @@ export default function SearchInterface() {
                   {result.additional_sources.map((source, i) => (
                     <div key={i} className="p-4">
                       <p className="text-[14px] font-semibold text-primary">
-                        Hilchot {source.treatise}, Chapter {source.chapter}
+                        Hilchot {source.treatise.replace(/^\s*hilchot\s+/i, "")}, Chapter {source.chapter}
                       </p>
                       <p className="text-[13px] text-muted-gray mt-1">{source.description}</p>
                     </div>
