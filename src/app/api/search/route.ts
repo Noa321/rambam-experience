@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,7 +11,6 @@ const supabase = createClient(
 );
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 interface Match {
   treatise_name: string;
@@ -65,10 +63,10 @@ export async function POST(req: NextRequest) {
       )
       .join("\n\n");
 
-    // 4. Generate the answer with Claude Haiku
-    const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
+    // 4. Generate the answer with OpenAI GPT-5.1
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.1",
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "user",
@@ -82,7 +80,7 @@ ${context}
 Instructions:
 - Answer the question based ONLY on what the Rambam says in these chapters.
 - Quote or paraphrase the specific halachot that address the question.
-- Use clear, modern English.
+- CRITICAL FORMAT RULE: Write the answer as 2-4 paragraphs of CONTINUOUS FLOWING PROSE only — full sentences and paragraphs, the way an essay is written. Never use a numbered list, a bulleted list, dashes, asterisks, bold, or any line that begins with a number or symbol. Cite locations inline within the sentences.
 - Cite each ruling with its location (e.g., "Hilchot Mechirah, Chapter 14, Halacha 7").
 - If the chapters don't directly address the question, say so honestly and explain what related topic they DO cover.
 - Keep the answer to 2-4 paragraphs. Be direct and practical.
@@ -90,7 +88,7 @@ Instructions:
 
 Respond with JSON:
 {
-  "answer": "Your answer text here. Use paragraphs separated by \\n\\n.",
+  "answer": "Your answer text here. Use paragraphs separated by \\n\\n. No markdown.",
   "primary_source": {
     "treatise": "Name of treatise",
     "chapter": 14,
@@ -107,7 +105,7 @@ Output ONLY valid JSON.`,
       ],
     });
 
-    const responseText = message.content[0].type === "text" ? message.content[0].text : "";
+    const responseText = completion.choices[0]?.message?.content || "";
 
     let parsed: {
       answer: string;
