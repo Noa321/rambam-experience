@@ -1,0 +1,666 @@
+[
+{
+"book_number": 1,
+"book_name": "Knowledge",
+"treatise_name": "Foundations of the Torah",
+"sefaria_name": "Foundations_of_the_Torah",
+"sefaria_ref_display": "Foundations of the Torah",
+"chapters": 10
+},
+{
+"book_number": 1,
+"book_name": "Knowledge",
+"treatise_name": "Human Dispositions",
+"sefaria_name": "Human_Dispositions",
+"sefaria_ref_display": "Human Dispositions",
+"chapters": 7
+},
+{
+"book_number": 1,
+"book_name": "Knowledge",
+"treatise_name": "Torah Study",
+"sefaria_name": "Torah_Study",
+"sefaria_ref_display": "Torah Study",
+"chapters": 7
+},
+{
+"book_number": 1,
+"book_name": "Knowledge",
+"treatise_name": "Foreign Worship",
+"sefaria_name": "Foreign_Worship_and_Customs_of_the_Nations",
+"sefaria_ref_display": "Foreign Worship and Customs of the Nations",
+"chapters": 12
+},
+{
+"book_number": 1,
+"book_name": "Knowledge",
+"treatise_name": "Repentance",
+"sefaria_name": "Repentance",
+"sefaria_ref_display": "Repentance",
+"chapters": 10
+},
+{
+"book_number": 2,
+"book_name": "Love",
+"treatise_name": "Reading the Shema",
+"sefaria_name": "Reading_the_Shema",
+"sefaria_ref_display": "Reading the Shema",
+"chapters": 4
+},
+{
+"book_number": 2,
+"book_name": "Love",
+"treatise_name": "Prayer and the Priestly Blessing",
+"sefaria_name": "Prayer_and_the_Priestly_Blessing",
+"sefaria_ref_display": "Prayer and the Priestly Blessing",
+"chapters": 15
+},
+{
+"book_number": 2,
+"book_name": "Love",
+"treatise_name": "Tefillin, Mezuzah and Torah Scroll",
+"sefaria_name": "Tefillin%2C_Mezuzah_and_the_Torah_Scroll",
+"sefaria_ref_display": "Tefillin, Mezuzah and the Torah Scroll",
+"chapters": 10
+},
+{
+"book_number": 2,
+"book_name": "Love",
+"treatise_name": "Fringes",
+"sefaria_name": "Fringes",
+"sefaria_ref_display": "Fringes",
+"chapters": 3
+},
+{
+"book_number": 2,
+"book_name": "Love",
+"treatise_name": "Blessings",
+"sefaria_name": "Blessings",
+"sefaria_ref_display": "Blessings",
+"chapters": 11
+},
+{
+"book_number": 2,
+"book_name": "Love",
+"treatise_name": "Circumcision",
+"sefaria_name": "Circumcision",
+"sefaria_ref_display": "Circumcision",
+"chapters": 3
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Sabbath",
+"sefaria_name": "Sabbath",
+"sefaria_ref_display": "Sabbath",
+"chapters": 30
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Eruvin",
+"sefaria_name": "Eruvin",
+"sefaria_ref_display": "Eruvin",
+"chapters": 8
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Rest on the Tenth of Tishrei",
+"sefaria_name": "Rest_on_the_Tenth_of_Tishrei",
+"sefaria_ref_display": "Rest on the Tenth of Tishrei",
+"chapters": 3
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Rest on a Holiday",
+"sefaria_name": "Rest_on_a_Holiday",
+"sefaria_ref_display": "Rest on a Holiday",
+"chapters": 8
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Leavened and Unleavened Bread",
+"sefaria_name": "Leavened_and_Unleavened_Bread",
+"sefaria_ref_display": "Leavened and Unleavened Bread",
+"chapters": 8
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Shofar, Sukkah and Lulav",
+"sefaria_name": "Shofar%2C_Sukkah_and_Lulav",
+"sefaria_ref_display": "Shofar, Sukkah and Lulav",
+"chapters": 8
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Sheqel Dues",
+"sefaria_name": "Sheqel_Dues",
+"sefaria_ref_display": "Sheqel Dues",
+"chapters": 4
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Sanctification of the New Month",
+"sefaria_name": "Sanctification_of_the_New_Month",
+"sefaria_ref_display": "Sanctification of the New Month",
+"chapters": 19
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Fasts",
+"sefaria_name": "Fasts",
+"sefaria_ref_display": "Fasts",
+"chapters": 5
+},
+{
+"book_number": 3,
+"book_name": "Times",
+"treatise_name": "Scroll of Esther and Hanukkah",
+"sefaria_name": "Scroll_of_Esther_and_Hanukkah",
+"sefaria_ref_display": "Scroll of Esther and Hanukkah",
+"chapters": 4
+},
+{
+"book_number": 4,
+"book_name": "Women",
+"treatise_name": "Marriage",
+"sefaria_name": "Marriage",
+"sefaria_ref_display": "Marriage",
+"chapters": 25
+},
+{
+"book_number": 4,
+"book_name": "Women",
+"treatise_name": "Divorce",
+"sefaria_name": "Divorce",
+"sefaria_ref_display": "Divorce",
+"chapters": 13
+},
+{
+"book_number": 4,
+"book_name": "Women",
+"treatise_name": "Levirate Marriage and Release",
+"sefaria_name": "Levirate_Marriage_and_Release",
+"sefaria_ref_display": "Levirate Marriage and Release",
+"chapters": 8
+},
+{
+"book_number": 4,
+"book_name": "Women",
+"treatise_name": "Virgin Maiden",
+"sefaria_name": "Virgin_Maiden",
+"sefaria_ref_display": "Virgin Maiden",
+"chapters": 3
+},
+{
+"book_number": 4,
+"book_name": "Women",
+"treatise_name": "Woman Suspected of Infidelity",
+"sefaria_name": "Woman_Suspected_of_Infidelity",
+"sefaria_ref_display": "Woman Suspected of Infidelity",
+"chapters": 4
+},
+{
+"book_number": 5,
+"book_name": "Holiness",
+"treatise_name": "Forbidden Intercourse",
+"sefaria_name": "Forbidden_Intercourse",
+"sefaria_ref_display": "Forbidden Intercourse",
+"chapters": 22
+},
+{
+"book_number": 5,
+"book_name": "Holiness",
+"treatise_name": "Forbidden Foods",
+"sefaria_name": "Forbidden_Foods",
+"sefaria_ref_display": "Forbidden Foods",
+"chapters": 17
+},
+{
+"book_number": 5,
+"book_name": "Holiness",
+"treatise_name": "Ritual Slaughter",
+"sefaria_name": "Ritual_Slaughter",
+"sefaria_ref_display": "Ritual Slaughter",
+"chapters": 14
+},
+{
+"book_number": 6,
+"book_name": "Separation",
+"treatise_name": "Oaths",
+"sefaria_name": "Oaths",
+"sefaria_ref_display": "Oaths",
+"chapters": 12
+},
+{
+"book_number": 6,
+"book_name": "Separation",
+"treatise_name": "Vows",
+"sefaria_name": "Vows",
+"sefaria_ref_display": "Vows",
+"chapters": 13
+},
+{
+"book_number": 6,
+"book_name": "Separation",
+"treatise_name": "Nazirite",
+"sefaria_name": "Nazirite",
+"sefaria_ref_display": "Nazirite",
+"chapters": 10
+},
+{
+"book_number": 6,
+"book_name": "Separation",
+"treatise_name": "Appraisals and Devoted Property",
+"sefaria_name": "Appraisals_and_Devoted_Property",
+"sefaria_ref_display": "Appraisals and Devoted Property",
+"chapters": 8
+},
+{
+"book_number": 7,
+"book_name": "Seeds",
+"treatise_name": "Diverse Species",
+"sefaria_name": "Diverse_Species",
+"sefaria_ref_display": "Diverse Species",
+"chapters": 10
+},
+{
+"book_number": 7,
+"book_name": "Seeds",
+"treatise_name": "Gifts to the Poor",
+"sefaria_name": "Gifts_to_the_Poor",
+"sefaria_ref_display": "Gifts to the Poor",
+"chapters": 10
+},
+{
+"book_number": 7,
+"book_name": "Seeds",
+"treatise_name": "Heave Offerings",
+"sefaria_name": "Heave_Offerings",
+"sefaria_ref_display": "Heave Offerings",
+"chapters": 15
+},
+{
+"book_number": 7,
+"book_name": "Seeds",
+"treatise_name": "Tithes",
+"sefaria_name": "Tithes",
+"sefaria_ref_display": "Tithes",
+"chapters": 14
+},
+{
+"book_number": 7,
+"book_name": "Seeds",
+"treatise_name": "Second Tithes and Fourth Year's Fruit",
+"sefaria_name": "Second_Tithes_and_Fourth_Year's_Fruit",
+"sefaria_ref_display": "Second Tithes and Fourth Year's Fruit",
+"chapters": 11
+},
+{
+"book_number": 7,
+"book_name": "Seeds",
+"treatise_name": "First Fruits",
+"sefaria_name": "First_Fruits_and_other_Gifts_to_Priests_Outside_the_Sanctuary",
+"sefaria_ref_display": "First Fruits and other Gifts to Priests Outside the Sanctuary",
+"chapters": 12
+},
+{
+"book_number": 7,
+"book_name": "Seeds",
+"treatise_name": "Sabbatical Year and the Jubilee",
+"sefaria_name": "Sabbatical_Year_and_the_Jubilee",
+"sefaria_ref_display": "Sabbatical Year and the Jubilee",
+"chapters": 13
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "The Chosen Temple",
+"sefaria_name": "The_Chosen_Temple",
+"sefaria_ref_display": "The Chosen Temple",
+"chapters": 8
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Vessels of the Sanctuary",
+"sefaria_name": "Vessels_of_the_Sanctuary_and_Those_who_Serve_Therein",
+"sefaria_ref_display": "Vessels of the Sanctuary and Those who Serve Therein",
+"chapters": 10
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Admission into the Sanctuary",
+"sefaria_name": "Admission_into_the_Sanctuary",
+"sefaria_ref_display": "Admission into the Sanctuary",
+"chapters": 9
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Things Forbidden on the Altar",
+"sefaria_name": "Things_Forbidden_on_the_Altar",
+"sefaria_ref_display": "Things Forbidden on the Altar",
+"chapters": 7
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Sacrificial Procedure",
+"sefaria_name": "Sacrificial_Procedure",
+"sefaria_ref_display": "Sacrificial Procedure",
+"chapters": 19
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Daily Offerings",
+"sefaria_name": "Daily_Offerings_and_Additional_Offerings",
+"sefaria_ref_display": "Daily Offerings and Additional Offerings",
+"chapters": 10
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Sacrifices Rendered Unfit",
+"sefaria_name": "Sacrifices_Rendered_Unfit",
+"sefaria_ref_display": "Sacrifices Rendered Unfit",
+"chapters": 19
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Service on the Day of Atonement",
+"sefaria_name": "Service_on_the_Day_of_Atonement",
+"sefaria_ref_display": "Service on the Day of Atonement",
+"chapters": 5
+},
+{
+"book_number": 8,
+"book_name": "Service",
+"treatise_name": "Trespass",
+"sefaria_name": "Trespass",
+"sefaria_ref_display": "Trespass",
+"chapters": 8
+},
+{
+"book_number": 9,
+"book_name": "Sacrifices",
+"treatise_name": "Paschal Offering",
+"sefaria_name": "Paschal_Offering",
+"sefaria_ref_display": "Paschal Offering",
+"chapters": 10
+},
+{
+"book_number": 9,
+"book_name": "Sacrifices",
+"treatise_name": "Festival Offering",
+"sefaria_name": "Festival_Offering",
+"sefaria_ref_display": "Festival Offering",
+"chapters": 3
+},
+{
+"book_number": 9,
+"book_name": "Sacrifices",
+"treatise_name": "Firstlings",
+"sefaria_name": "Firstlings",
+"sefaria_ref_display": "Firstlings",
+"chapters": 8
+},
+{
+"book_number": 9,
+"book_name": "Sacrifices",
+"treatise_name": "Offerings for Unintentional Transgressions",
+"sefaria_name": "Offerings_for_Unintentional_Transgressions",
+"sefaria_ref_display": "Offerings for Unintentional Transgressions",
+"chapters": 15
+},
+{
+"book_number": 9,
+"book_name": "Sacrifices",
+"treatise_name": "Offerings for Incomplete Atonement",
+"sefaria_name": "Offerings_for_Those_with_Incomplete_Atonement",
+"sefaria_ref_display": "Offerings for Those with Incomplete Atonement",
+"chapters": 5
+},
+{
+"book_number": 9,
+"book_name": "Sacrifices",
+"treatise_name": "Substitution",
+"sefaria_name": "Substitution",
+"sefaria_ref_display": "Substitution",
+"chapters": 4
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Defilement by a Corpse",
+"sefaria_name": "Defilement_by_a_Corpse",
+"sefaria_ref_display": "Defilement by a Corpse",
+"chapters": 25
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Red Heifer",
+"sefaria_name": "Red_Heifer",
+"sefaria_ref_display": "Red Heifer",
+"chapters": 15
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Defilement by Leprosy",
+"sefaria_name": "Defilement_by_Leprosy",
+"sefaria_ref_display": "Defilement by Leprosy",
+"chapters": 16
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Those Who Defile Bed or Seat",
+"sefaria_name": "Those_Who_Defile_Bed_or_Seat",
+"sefaria_ref_display": "Those Who Defile Bed or Seat",
+"chapters": 13
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Other Fathers of Defilement",
+"sefaria_name": "Other_Fathers_of_Defilement",
+"sefaria_ref_display": "Other Fathers of Defilement",
+"chapters": 20
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Defilement of Foods",
+"sefaria_name": "Defilement_of_Foods",
+"sefaria_ref_display": "Defilement of Foods",
+"chapters": 16
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Vessels",
+"sefaria_name": "Vessels",
+"sefaria_ref_display": "Vessels",
+"chapters": 28
+},
+{
+"book_number": 10,
+"book_name": "Purity",
+"treatise_name": "Immersion Pools",
+"sefaria_name": "Immersion_Pools",
+"sefaria_ref_display": "Immersion Pools",
+"chapters": 11
+},
+{
+"book_number": 11,
+"book_name": "Injuries",
+"treatise_name": "Damages to Property",
+"sefaria_name": "Damages_to_Property",
+"sefaria_ref_display": "Damages to Property",
+"chapters": 14
+},
+{
+"book_number": 11,
+"book_name": "Injuries",
+"treatise_name": "Theft",
+"sefaria_name": "Theft",
+"sefaria_ref_display": "Theft",
+"chapters": 9
+},
+{
+"book_number": 11,
+"book_name": "Injuries",
+"treatise_name": "Robbery and Lost Property",
+"sefaria_name": "Robbery_and_Lost_Property",
+"sefaria_ref_display": "Robbery and Lost Property",
+"chapters": 18
+},
+{
+"book_number": 11,
+"book_name": "Injuries",
+"treatise_name": "One Who Injures a Person or Property",
+"sefaria_name": "One_Who_Injures_a_Person_or_Property",
+"sefaria_ref_display": "One Who Injures a Person or Property",
+"chapters": 8
+},
+{
+"book_number": 11,
+"book_name": "Injuries",
+"treatise_name": "Murderer and the Preservation of Life",
+"sefaria_name": "Murderer_and_the_Preservation_of_Life",
+"sefaria_ref_display": "Murderer and the Preservation of Life",
+"chapters": 13
+},
+{
+"book_number": 12,
+"book_name": "Acquisition",
+"treatise_name": "Sales",
+"sefaria_name": "Sales",
+"sefaria_ref_display": "Sales",
+"chapters": 30
+},
+{
+"book_number": 12,
+"book_name": "Acquisition",
+"treatise_name": "Ownerless Property and Gifts",
+"sefaria_name": "Ownerless_Property_and_Gifts",
+"sefaria_ref_display": "Ownerless Property and Gifts",
+"chapters": 12
+},
+{
+"book_number": 12,
+"book_name": "Acquisition",
+"treatise_name": "Neighbors",
+"sefaria_name": "Neighbors",
+"sefaria_ref_display": "Neighbors",
+"chapters": 14
+},
+{
+"book_number": 12,
+"book_name": "Acquisition",
+"treatise_name": "Agents and Partners",
+"sefaria_name": "Agents_and_Partners",
+"sefaria_ref_display": "Agents and Partners",
+"chapters": 10
+},
+{
+"book_number": 12,
+"book_name": "Acquisition",
+"treatise_name": "Slaves",
+"sefaria_name": "Slaves",
+"sefaria_ref_display": "Slaves",
+"chapters": 9
+},
+{
+"book_number": 13,
+"book_name": "Judgments",
+"treatise_name": "Hiring",
+"sefaria_name": "Hiring",
+"sefaria_ref_display": "Hiring",
+"chapters": 13
+},
+{
+"book_number": 13,
+"book_name": "Judgments",
+"treatise_name": "Borrowing and Deposit",
+"sefaria_name": "Borrowing_and_Deposit",
+"sefaria_ref_display": "Borrowing and Deposit",
+"chapters": 8
+},
+{
+"book_number": 13,
+"book_name": "Judgments",
+"treatise_name": "Creditor and Debtor",
+"sefaria_name": "Creditor_and_Debtor",
+"sefaria_ref_display": "Creditor and Debtor",
+"chapters": 27
+},
+{
+"book_number": 13,
+"book_name": "Judgments",
+"treatise_name": "Plaintiff and Defendant",
+"sefaria_name": "Plaintiff_and_Defendant",
+"sefaria_ref_display": "Plaintiff and Defendant",
+"chapters": 16
+},
+{
+"book_number": 13,
+"book_name": "Judgments",
+"treatise_name": "Inheritance",
+"sefaria_name": "Inheritance",
+"sefaria_ref_display": "Inheritance",
+"chapters": 11
+},
+{
+"book_number": 14,
+"book_name": "Judges",
+"treatise_name": "The Sanhedrin",
+"sefaria_name": "The_Sanhedrin_and_the_Penalties_within_their_Jurisdiction",
+"sefaria_ref_display": "The Sanhedrin and the Penalties within their Jurisdiction",
+"chapters": 26
+},
+{
+"book_number": 14,
+"book_name": "Judges",
+"treatise_name": "Testimony",
+"sefaria_name": "Testimony",
+"sefaria_ref_display": "Testimony",
+"chapters": 22
+},
+{
+"book_number": 14,
+"book_name": "Judges",
+"treatise_name": "Rebels",
+"sefaria_name": "Rebels",
+"sefaria_ref_display": "Rebels",
+"chapters": 7
+},
+{
+"book_number": 14,
+"book_name": "Judges",
+"treatise_name": "Mourning",
+"sefaria_name": "Mourning",
+"sefaria_ref_display": "Mourning",
+"chapters": 14
+},
+{
+"book_number": 14,
+"book_name": "Judges",
+"treatise_name": "Kings and Wars",
+"sefaria_name": "Kings_and_Wars",
+"sefaria_ref_display": "Kings and Wars",
+"chapters": 12
+}
+]
