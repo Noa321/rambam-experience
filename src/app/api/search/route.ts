@@ -78,17 +78,17 @@ RELEVANT CHAPTERS FROM THE RAMBAM:
 ${context}
 
 Instructions:
-- Answer the question based ONLY on what the Rambam says in these chapters.
-- Quote or paraphrase the specific halachot that address the question.
-- CRITICAL FORMAT RULE: Write the answer as 2-4 paragraphs of CONTINUOUS FLOWING PROSE only — full sentences and paragraphs, the way an essay is written. Never use a numbered list, a bulleted list, dashes, asterisks, bold, or any line that begins with a number or symbol. Cite locations inline within the sentences.
-- Cite each ruling with its location (e.g., "Hilchot Mechirah, Chapter 14, Halacha 7").
-- If the chapters don't directly address the question, say so honestly and explain what related topic they DO cover.
-- Keep the answer to 2-4 paragraphs. Be direct and practical.
-- Do not add your own opinions or other sources. Only the Rambam.
+- Base the answer only on the Rambam's actual rulings, but write authoritatively, presenting his position directly.
+- VOICE: NEVER mention "the chapters", "the chapters provided/supplied", "the text given", "these sources", "the passages", or the fact that you were handed excerpts. Do NOT begin with phrases like "In the chapters you supplied" or "From these chapters". Simply state the ruling, e.g. "The Rambam rules that…" or "According to the Rambam,…".
+- STRUCTURE for readability: Begin with ONE short bold sentence giving the bottom-line answer, wrapped in **double asterisks** — and put NO other bold inside that opening sentence. Then write 2-3 SHORT paragraphs (separated by a blank line) explaining the ruling. Keep paragraphs short and scannable.
+- EMPHASIS: Use **bold** sparingly to highlight the core ruling and key terms (for example **kinyan** or **asmachta**). Do NOT use bullet points, numbered lists, or dashes to structure the answer — use flowing prose paragraphs only.
+- Cite each ruling inline with its location (e.g., "Hilchot Mechirah, Chapter 14").
+- If the Rambam does not address this question, say so plainly and name the closest related topic he does cover — without referring to "the chapters".
+- Do not add your own opinions or outside sources. Only the Rambam.
 
 Respond with JSON:
 {
-  "answer": "Your answer text here. Use paragraphs separated by \\n\\n. No markdown.",
+  "answer": "A short bold bottom-line sentence wrapped in **double asterisks**, then 2-3 short paragraphs separated by \\n\\n. Use **bold** for key terms. No bullet points or numbered lists.",
   "primary_source": {
     "treatise": "Name of treatise",
     "chapter": 14,

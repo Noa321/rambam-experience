@@ -193,7 +193,17 @@ export default function SearchInterface() {
               </p>
               <div className="font-serif text-[16px] leading-[28px] text-primary space-y-4">
                 {result.answer.split("\n\n").map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
+                  <p key={i}>
+                    {paragraph.split(/(\*\*[^*]+\*\*)/g).map((seg, j) =>
+                      /^\*\*[^*]+\*\*$/.test(seg) ? (
+                        <strong key={j} className="font-semibold">
+                          {seg.slice(2, -2)}
+                        </strong>
+                      ) : (
+                        seg
+                      )
+                    )}
+                  </p>
                 ))}
               </div>
             </div>
