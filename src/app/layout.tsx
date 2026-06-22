@@ -22,9 +22,24 @@ const notoSerifHebrew = Noto_Serif_Hebrew({
 });
 
 export const metadata: Metadata = {
-  title: "The Rambam Experience",
+  metadataBase: new URL("https://rambamexperience.com"),
+  title: {
+    default: "The Rambam Experience",
+    template: "%s | The Rambam Experience",
+  },
   description:
     "Daily Torah insights on the Rambam's Mishneh Torah — three chapters a day.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "The Rambam Experience",
+    description:
+      "Daily Torah insights on the Rambam's Mishneh Torah — three chapters a day.",
+    url: "https://rambamexperience.com",
+    siteName: "The Rambam Experience",
+    type: "website",
+  },
+  // Google Search Console verification — paste the code from the HTML-tag
+  // verification method here, e.g. verification: { google: "abc123" },
 };
 
 export default function RootLayout({
