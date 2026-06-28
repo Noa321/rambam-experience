@@ -9,7 +9,10 @@ const supabase = createClient(
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { device_id, rambam_date, score, max_score, round_results } = body;
+    const { device_id, rambam_date, score, max_score } = body;
+    // The Case sends stage_results; the legacy Riddle sent round_results. Store
+    // whichever arrives in the existing round_results jsonb column.
+    const results = body.stage_results ?? body.round_results ?? null;
 
     if (!device_id || !rambam_date || score === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -22,8 +25,8 @@ export async function POST(req: NextRequest) {
           device_id,
           rambam_date,
           score,
-          max_score: max_score || 9,
-          round_results,
+          max_score: max_score || 12,
+          round_results: results,
           played_at: new Date().toISOString(),
         },
         { onConflict: "device_id,rambam_date" }

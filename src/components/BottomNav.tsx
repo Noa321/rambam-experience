@@ -8,7 +8,7 @@ export default function BottomNav() {
 
   const tabs = [
     { href: "/", icon: "calendar_today", label: "Today", match: "/" },
-    { href: "/game", icon: "quiz", label: "Game", match: "/game" },
+    { href: "/game", icon: "gavel", label: "Case", match: "/game" },
     { href: "/search", icon: "search", label: "Search", match: "/search" },
     { href: "/library", icon: "auto_stories", label: "Library", match: "/library" },
     { href: "/archive", icon: "history", label: "Archive", match: "/archive" },
