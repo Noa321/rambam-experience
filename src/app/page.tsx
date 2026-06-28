@@ -81,10 +81,13 @@ async function getRecentContent(): Promise<ContentRecord[]> {
 }
 
 function formatDateUpper(dateStr: string) {
+  // dateStr is a plain YYYY-MM-DD; format in UTC so the calendar day doesn't
+  // shift backward in negative-offset server timezones.
   return new Date(dateStr).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   }).toUpperCase();
 }
 
@@ -92,6 +95,7 @@ function formatShortDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   }).toUpperCase();
 }
 
@@ -196,7 +200,7 @@ export default async function Home() {
     <div className="min-h-screen pb-28">
       <Header />
 
-      <main className="max-w-[800px] mx-auto px-5 mt-6">
+      <main className="max-w-[920px] mx-auto px-5 mt-6">
         {today ? (
           <>
             {/* Date Header */}
@@ -253,7 +257,7 @@ export default async function Home() {
               </div>
 
               {/* Action Cards */}
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Link
                   href={`/read/${today.id}`}
                   className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-soft-border hover:bg-surface-container-low transition-colors active:scale-[0.99]"

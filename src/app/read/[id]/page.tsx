@@ -70,6 +70,7 @@ export default async function ReadPage({
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   });
 
   // The essay body is pipeline-generated HTML that ships with its own embedded
@@ -114,7 +115,7 @@ export default async function ReadPage({
         className="sticky top-0 z-50 border-b border-soft-border bottom-nav-blur"
         style={{ backgroundColor: "rgba(253, 251, 247, 0.85)" }}
       >
-        <div className="max-w-[680px] mx-auto px-5 h-14 flex items-center justify-between">
+        <div className="max-w-[620px] mx-auto px-5 h-14 flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center gap-1 text-[15px] font-medium text-primary hover:text-parchment-gold transition-colors"
@@ -141,7 +142,7 @@ export default async function ReadPage({
       </header>
 
       {/* Article */}
-      <article className="max-w-[680px] mx-auto px-5 py-10">
+      <article className="max-w-[620px] mx-auto px-5 py-10">
         <div className="mb-8 text-center">
           <p
             className="text-[10px] font-semibold tracking-[0.15em] uppercase text-parchment-gold mb-4"
