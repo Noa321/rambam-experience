@@ -16,8 +16,11 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 pb-4 px-6 border-t border-soft-border bottom-nav-blur"
-      style={{ backgroundColor: "rgba(253, 251, 247, 0.8)" }}
+      className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center pt-2 px-6 border-t border-soft-border bottom-nav-blur"
+      style={{
+        backgroundColor: "rgba(253, 251, 247, 0.92)",
+        paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))",
+      }}
     >
       {tabs.map((tab) => {
         const isActive = pathname === tab.match;

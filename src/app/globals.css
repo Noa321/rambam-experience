@@ -47,7 +47,24 @@ body {
   -webkit-tap-highlight-color: transparent;
   background-color: #FDFBF7;
   color: #1D1D1F;
-  min-height: 100dvh;
+  /* The body itself does not scroll — content scrolls inside #app-scroll.
+     This keeps the fixed bottom nav from bouncing as iOS Safari's toolbar
+     shows/hides during a window scroll. */
+  height: 100dvh;
+  overflow: hidden;
+}
+
+html {
+  height: 100%;
+}
+
+/* The single scroll region for page content (wraps every page in layout.tsx). */
+#app-scroll {
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 h1, h2, h3, h4 {

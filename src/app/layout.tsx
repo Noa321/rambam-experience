@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4, Noto_Serif_Hebrew } from "next/font/google";
 import BottomNav from "@/components/BottomNav";
 import "./globals.css";
@@ -42,6 +42,13 @@ export const metadata: Metadata = {
   // verification method here, e.g. verification: { google: "abc123" },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#FDFBF7",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -58,7 +65,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${sourceSerif4.variable} ${notoSerifHebrew.variable} antialiased`}
       >
-        {children}
+        <div id="app-scroll">{children}</div>
         <BottomNav />
       </body>
     </html>
