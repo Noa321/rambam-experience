@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import SearchInterface from "./SearchInterface";
 
 export const metadata: Metadata = {
-  title: "Source Finder | The Rambam Experience",
+  title: "Source Finder",
   description: "Ask any question and find the Rambam's ruling in the Mishneh Torah",
 };
 

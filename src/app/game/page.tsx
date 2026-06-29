@@ -6,7 +6,7 @@ import CaseGame from "./CaseGame";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "The Rambam Case | The Rambam Experience",
+  title: "The Rambam Case",
   description: "A daily case to test your reasoning against the Rambam's Mishneh Torah",
 };
 
