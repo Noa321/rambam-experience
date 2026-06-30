@@ -25,6 +25,20 @@ if (!SUPABASE_KEY) throw new Error('Missing SUPABASE_ANON_KEY');
 const MODEL = 'claude-sonnet-4-5-20250929';
 const MAX_CATCHUP_DAYS = 10;
 
+// ─── Study track ───
+// Which Rambam cycle to run: 'three-chapter' (default, 3 perakim/day) or
+// 'one-chapter' (1 perek/day). Set via `--track=one-chapter` or RAMBAM_TRACK.
+// Everything below is a no-op for the default track, so the daily 3-chapter run
+// is byte-for-byte unchanged.
+const TRACK = (() => {
+  const arg = process.argv.find((a) => a.startsWith('--track='));
+  const v = arg ? arg.split('=')[1] : process.env.RAMBAM_TRACK;
+  return v === 'one-chapter' ? 'one-chapter' : 'three-chapter';
+})();
+// One-chapter files get a slug prefix so the two tracks never overwrite each
+// other's audio / one-pagers in storage. Three-chapter keeps its bare slugs.
+const SLUG_PREFIX = TRACK === 'one-chapter' ? '1ch-' : '';
+
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_KEY });
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -138,13 +152,16 @@ async function getDayInfo(dateStr) {
   if (!res.ok) throw new Error(`Sefaria calendar API failed: ${res.status}`);
   const data = await res.json();
 
-  // A normal day has ONE "Daily Rambam (3 Chapters)" item; a treatise-transition
-  // day has TWO (e.g. "Second Tithes 11" + "First Fruits 1-2"). Collect them all.
+  // Sefaria's calendar carries both cycles: "Daily Rambam (3 Chapters)" for the
+  // 3-perek track and plain "Daily Rambam" for the 1-perek track. A 3-chapter
+  // transition day can have TWO items (e.g. "Second Tithes 11" + "First Fruits
+  // 1-2"); collect them all. The 1-chapter track is always a single item.
   const items = (data.calendar_items || []).filter((item) => {
     const title = JSON.stringify(item.title || {});
-    return title.includes('Rambam') && title.includes('3');
+    if (!title.includes('Rambam')) return false;
+    return TRACK === 'one-chapter' ? !title.includes('3') : title.includes('3');
   });
-  if (items.length === 0) throw new Error(`No Daily Rambam (3 chapters) for ${dateStr}`);
+  if (items.length === 0) throw new Error(`No Daily Rambam (${TRACK}) for ${dateStr}`);
 
   const segments = [];
   for (const item of items) {
@@ -174,7 +191,7 @@ async function getDayInfo(dateStr) {
     dateStr,
     segments,
     chaptersLabel,
-    slug: deriveSlug(chaptersLabel),
+    slug: SLUG_PREFIX + deriveSlug(chaptersLabel),
     sefer: last.sefer,
     shortName: last.shortName,
     heName: HE_NAMES[last.shortName] || '',
@@ -207,6 +224,7 @@ async function alreadyPublished(dateStr) {
     .from('content')
     .select('id')
     .eq('content_type', 'dvar_torah')
+    .eq('track', TRACK)
     .eq('rambam_date', dateStr)
     .limit(1);
   return !!(data && data.length > 0);
@@ -350,6 +368,7 @@ async function publishToSupabase(html, dvarTorah, info) {
     body: html,
     status: 'published',
     source: 'claude',
+    track: TRACK,
     rambam_chapters: info.chaptersLabel,
     sefer: info.sefer,
     hilchot: info.shortName,
@@ -623,7 +642,7 @@ async function preflight() {
 
 // ─── Main: catch up from last published date through today ───
 async function main() {
-  console.log('=== Daily Rambam Pipeline ===');
+  console.log(`=== Daily Rambam Pipeline (track: ${TRACK}) ===`);
   await preflight();
 
   const { data: latest } = await supabase
@@ -631,6 +650,7 @@ async function main() {
     .select('rambam_date')
     .eq('content_type', 'dvar_torah')
     .eq('status', 'published')
+    .eq('track', TRACK)
     .not('rambam_date', 'is', null)
     .lte('rambam_date', easternDate())
     .order('rambam_date', { ascending: false })

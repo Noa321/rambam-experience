@@ -16,6 +16,7 @@ interface ContentRecord {
   media_url: string | null;
   rambam_date: string;
   published_at: string;
+  track?: string;
 }
 
 function deriveLearnSlug(chapters: string): string {
@@ -58,7 +59,7 @@ export default async function LearnPage({
   const { data, error } = await supabase
     .from("content")
     .select(
-      "id,title,rambam_chapters,sefer,hilchot,hook,summary,media_url,rambam_date,published_at"
+      "id,title,rambam_chapters,sefer,hilchot,hook,summary,media_url,rambam_date,published_at,track"
     )
     .eq("id", id)
     .single();
@@ -68,7 +69,10 @@ export default async function LearnPage({
   }
 
   const content = data as ContentRecord;
-  const slug = deriveLearnSlug(content.rambam_chapters);
+  // 1-chapter-track files are stored with a "1ch-" slug prefix so the two cycles
+  // never collide; mirror that here when reconstructing the storage path.
+  const slugPrefix = content.track === "one-chapter" ? "1ch-" : "";
+  const slug = slugPrefix + deriveLearnSlug(content.rambam_chapters);
   const learnUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://htwyavvzmcmlucpmqytb.supabase.co"}/storage/v1/object/public/media/learns/learn-${slug}.html`;
 
   let learnHtml: string | null = null;

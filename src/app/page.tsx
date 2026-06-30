@@ -1,8 +1,11 @@
 import { getSupabase } from "@/lib/supabase";
 import { books } from "@/data/books";
 import { cyclePositionFromContent } from "@/lib/cycle";
+import { type Track } from "@/lib/track";
+import { getActiveTrack } from "@/lib/track-server";
 import Link from "next/link";
 import Header from "@/components/Header";
+import TrackToggle from "@/components/TrackToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +23,7 @@ interface ContentRecord {
   body: string;
 }
 
-async function getTodaysContent(): Promise<ContentRecord | null> {
+async function getTodaysContent(track: Track): Promise<ContentRecord | null> {
   const supabase = getSupabase();
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const nowISO = new Date().toISOString();
@@ -30,6 +33,7 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
     .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .eq("track", track)
     .eq("rambam_date", today)
     .limit(1)
     .single();
@@ -41,6 +45,7 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
     .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .eq("track", track)
     .not("rambam_date", "is", null)
     .lte("rambam_date", today)
     .order("rambam_date", { ascending: false })
@@ -54,6 +59,7 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
     .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .eq("track", track)
     .lte("published_at", nowISO)
     .order("published_at", { ascending: false })
     .limit(1)
@@ -63,7 +69,7 @@ async function getTodaysContent(): Promise<ContentRecord | null> {
   return null;
 }
 
-async function getRecentContent(): Promise<ContentRecord[]> {
+async function getRecentContent(track: Track): Promise<ContentRecord[]> {
   const supabase = getSupabase();
   const nowISO = new Date().toISOString();
 
@@ -72,6 +78,7 @@ async function getRecentContent(): Promise<ContentRecord[]> {
     .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .eq("track", track)
     .lte("published_at", nowISO)
     .order("published_at", { ascending: false })
     .limit(7);
@@ -191,8 +198,9 @@ function parseChaptersFromContent(rambamChapters: string, hilchot: string, sefer
 
 
 export default async function Home() {
-  const today = await getTodaysContent();
-  const recent = await getRecentContent();
+  const track = await getActiveTrack();
+  const today = await getTodaysContent(track);
+  const recent = await getRecentContent(track);
   const todayChapters = today ? parseChaptersFromContent(today.rambam_chapters, today.hilchot, today.sefer) : [];
   const cyclePos = today ? cyclePositionFromContent(today.rambam_chapters, today.hilchot) : null;
 
@@ -201,6 +209,11 @@ export default async function Home() {
       <Header />
 
       <main className="max-w-[920px] mx-auto px-5 mt-6">
+        {/* Study-cycle toggle — always visible so an empty track can be switched back */}
+        <div className="mb-5">
+          <TrackToggle active={track} />
+        </div>
+
         {today ? (
           <>
             {/* Date Header */}
@@ -318,7 +331,7 @@ export default async function Home() {
                     </div>
                     <div>
                       <h3 className="text-[15px] font-semibold text-charcoal-text">One Page Summary</h3>
-                      <p className="text-[13px] text-muted-gray">On today&#39;s 3 chapters</p>
+                      <p className="text-[13px] text-muted-gray">{track === "one-chapter" ? "On today’s chapter" : "On today’s 3 chapters"}</p>
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-muted-gray" style={{ fontSize: "20px" }}>chevron_right</span>

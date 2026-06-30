@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { getActiveTrack } from "@/lib/track-server";
 import { Metadata } from "next";
 import Link from "next/link";
 import CaseGame from "./CaseGame";
@@ -51,12 +52,14 @@ interface CaseRecord {
 export default async function GamePage() {
   const supabase = getSupabase();
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const track = await getActiveTrack();
 
   let puzzle: CaseRecord | null = null;
 
   const { data: todayData } = await supabase
     .from("game_cases")
     .select("*")
+    .eq("track", track)
     .eq("rambam_date", today)
     .maybeSingle();
 
@@ -66,6 +69,7 @@ export default async function GamePage() {
     const { data: recentData } = await supabase
       .from("game_cases")
       .select("*")
+      .eq("track", track)
       .lte("rambam_date", today)
       .order("rambam_date", { ascending: false })
       .limit(1)
@@ -112,6 +116,7 @@ export default async function GamePage() {
     .select("id")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .eq("track", track)
     .eq("rambam_date", puzzle.rambam_date)
     .limit(1)
     .maybeSingle();

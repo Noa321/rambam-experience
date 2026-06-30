@@ -1,4 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
+import { type Track } from "@/lib/track";
+import { getActiveTrack } from "@/lib/track-server";
 import { findTreatise } from "@/data/books";
 import {
   cyclePositionFromContent,
@@ -29,7 +31,7 @@ interface TodayRow {
   published_at: string;
 }
 
-async function getToday(): Promise<TodayRow | null> {
+async function getToday(track: Track): Promise<TodayRow | null> {
   const supabase = getSupabase();
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   const { data } = await supabase
@@ -37,6 +39,7 @@ async function getToday(): Promise<TodayRow | null> {
     .select("rambam_chapters,hilchot,sefer,rambam_date,published_at")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .eq("track", track)
     .not("rambam_date", "is", null)
     .lte("rambam_date", today)
     .order("rambam_date", { ascending: false })
@@ -46,7 +49,7 @@ async function getToday(): Promise<TodayRow | null> {
 }
 
 export default async function JourneyPage() {
-  const today = await getToday();
+  const today = await getToday(await getActiveTrack());
   const pos = today
     ? cyclePositionFromContent(today.rambam_chapters, today.hilchot)
     : null;

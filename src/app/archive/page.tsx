@@ -1,9 +1,11 @@
 import { getSupabase } from "@/lib/supabase";
+import { type Track } from "@/lib/track";
+import { getActiveTrack } from "@/lib/track-server";
 import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Archive | The Rambam Experience",
@@ -23,7 +25,7 @@ interface ContentRecord {
   published_at: string;
 }
 
-async function getAllContent(): Promise<ContentRecord[]> {
+async function getAllContent(track: Track): Promise<ContentRecord[]> {
   const supabase = getSupabase();
   const today = new Date().toISOString().split("T")[0];
   // Show every published d'var Torah — including older essays that have no
@@ -34,6 +36,7 @@ async function getAllContent(): Promise<ContentRecord[]> {
     .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
+    .eq("track", track)
     .or(`rambam_date.is.null,rambam_date.lte.${today}`)
     .order("rambam_date", { ascending: false, nullsFirst: false });
   if (error || !data) return [];
@@ -45,7 +48,7 @@ function formatFullDate(dateStr: string) {
 }
 
 export default async function ArchivePage() {
-  const content = await getAllContent();
+  const content = await getAllContent(await getActiveTrack());
   return (
     <div className="min-h-screen pb-28">
       <Header />

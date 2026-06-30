@@ -4,6 +4,7 @@
  */
 
 import { getSupabase } from "./supabase";
+import { DEFAULT_TRACK, type Track } from "./track";
 import type { InsightArticle, InsightSection } from "@/data/insights";
 
 /** Shape of a row in the Supabase `content` table */
@@ -16,6 +17,7 @@ export interface ContentRow {
   summary?: string;
   hook?: string;
   status: string;
+  track?: Track;
   rambam_date?: string;
   rambam_chapters?: string;
   sefer?: string;
@@ -76,7 +78,8 @@ function contentToInsight(content: ContentRow): InsightArticle {
  * Matches on the `hilchot` field (e.g. "Foundations of the Torah").
  */
 export async function fetchInsightsForTreatise(
-  treatiseName: string
+  treatiseName: string,
+  track: Track = DEFAULT_TRACK
 ): Promise<InsightArticle[]> {
   try {
     const supabase = getSupabase();
@@ -84,6 +87,7 @@ export async function fetchInsightsForTreatise(
       .from("content")
       .select("*")
       .eq("status", "published")
+      .eq("track", track)
       .ilike("hilchot", `%${treatiseName}%`)
       .order("created_at", { ascending: false });
 
@@ -102,7 +106,9 @@ export async function fetchInsightsForTreatise(
 /**
  * Fetch the latest published d'var Torah for the dashboard.
  */
-export async function fetchLatestInsight(): Promise<InsightArticle | null> {
+export async function fetchLatestInsight(
+  track: Track = DEFAULT_TRACK
+): Promise<InsightArticle | null> {
   try {
     const supabase = getSupabase();
     const { data, error } = await supabase
@@ -110,6 +116,7 @@ export async function fetchLatestInsight(): Promise<InsightArticle | null> {
       .select("*")
       .eq("status", "published")
       .eq("content_type", "dvar_torah")
+      .eq("track", track)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -127,13 +134,16 @@ export async function fetchLatestInsight(): Promise<InsightArticle | null> {
 /**
  * Fetch the latest published content that has audio (media_url).
  */
-export async function fetchLatestAudio(): Promise<ContentRow | null> {
+export async function fetchLatestAudio(
+  track: Track = DEFAULT_TRACK
+): Promise<ContentRow | null> {
   try {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from("content")
       .select("*")
       .eq("status", "published")
+      .eq("track", track)
       .not("media_url", "is", null)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -152,13 +162,16 @@ export async function fetchLatestAudio(): Promise<ContentRow | null> {
 /**
  * Fetch all published content that has audio.
  */
-export async function fetchAllAudio(): Promise<ContentRow[]> {
+export async function fetchAllAudio(
+  track: Track = DEFAULT_TRACK
+): Promise<ContentRow[]> {
   try {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from("content")
       .select("*")
       .eq("status", "published")
+      .eq("track", track)
       .not("media_url", "is", null)
       .order("created_at", { ascending: false });
 
@@ -176,13 +189,16 @@ export async function fetchAllAudio(): Promise<ContentRow[]> {
 /**
  * Fetch the latest published content (any type) for dashboard summary.
  */
-export async function fetchLatestContent(): Promise<ContentRow | null> {
+export async function fetchLatestContent(
+  track: Track = DEFAULT_TRACK
+): Promise<ContentRow | null> {
   try {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from("content")
       .select("*")
       .eq("status", "published")
+      .eq("track", track)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
