@@ -122,6 +122,17 @@ export default async function GamePage() {
     .maybeSingle();
   if (contentRow) contentId = (contentRow as { id: string }).id;
 
+  // Shuffle the principle order so the three relevant ones are not always in a
+  // fixed position (they were authored first). Done here on the server (this
+  // page is force-dynamic) so each load gets a fresh random order and the
+  // client renders the same array it was handed — no hydration mismatch.
+  const shuffledPrinciples = [...puzzle.case_data.principles];
+  for (let i = shuffledPrinciples.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledPrinciples[i], shuffledPrinciples[j]] = [shuffledPrinciples[j], shuffledPrinciples[i]];
+  }
+  const shuffledCaseData = { ...puzzle.case_data, principles: shuffledPrinciples };
+
   return (
     <CaseGame
       puzzle={{
@@ -129,7 +140,7 @@ export default async function GamePage() {
         chaptersLabel: puzzle.chapters_label,
         sefer: puzzle.sefer,
         hilchot: puzzle.hilchot,
-        caseData: puzzle.case_data,
+        caseData: shuffledCaseData,
       }}
       contentId={contentId}
     />
