@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>One-Page Learn (infographic) — Chosen Temple 2-4</title>
+<style>
+  :root{
+    --ink:#162839; --gold:#B8860B; --olive:#735C00; --muted:#7d7a72;
+    --cream:#FDFBF7; --card:#FFFFFF; --line:#ECE6D8; --wash:#F7F2E8; --red:#9c3b32;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    color:var(--ink);-webkit-font-smoothing:antialiased;padding:26px 14px;}
+  .page{max-width:840px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(22,40,57,.06);}
+  .cover{background:var(--ink);color:#fff;padding:24px 30px 22px;}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#e7c774;}
+  .he{font-family:Georgia,serif;font-size:25px;margin:9px 0 2px;direction:rtl;}
+  .title{font-family:Georgia,serif;font-size:23px;font-weight:700;margin:2px 0 6px;}
+  .meta{font-size:12.5px;color:#c7d2de;}
+
+  /* key-number strip */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--line);background:var(--wash);}
+  .stat{padding:14px 10px;text-align:center;border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .n{font-family:Georgia,serif;font-size:26px;font-weight:700;color:var(--gold);line-height:1;}
+  .stat .l{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.3;text-transform:uppercase;letter-spacing:.04em;}
+
+  .ch{padding:20px 30px 6px;border-top:1px solid var(--line);}
+  .ch:first-of-type{border-top:none;}
+  .ch-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .ch-num{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--gold);padding:3px 9px;border-radius:6px;}
+  .ch-title{font-family:Georgia,serif;font-size:19px;font-weight:600;}
+
+  .grid{display:grid;grid-template-columns:260px 1fr;gap:22px;align-items:start;}
+  .diagram{background:var(--wash);border:1px solid var(--line);border-radius:12px;padding:10px;}
+  .diagram svg{width:100%;height:auto;display:block;}
+  .dcap{font-size:10.5px;color:var(--muted);text-align:center;margin-top:4px;letter-spacing:.03em;}
+
+  ul.h{list-style:none;margin:0;padding:0;}
+  ul.h li{position:relative;padding:5px 0 5px 18px;font-size:13.5px;line-height:1.5;color:#26313d;border-bottom:1px solid #f3efe6;}
+  ul.h li:last-child{border-bottom:none;}
+  ul.h li::before{content:"";position:absolute;left:2px;top:11px;width:6px;height:6px;border-radius:50%;background:var(--gold);}
+  ul.h li b{color:var(--ink);font-weight:600;}
+  .ref{color:var(--muted);font-size:11.5px;}
+
+  .hook{margin:12px 0 2px;background:var(--ink);color:#fff;border-radius:10px;padding:10px 14px;
+    font-size:13px;line-height:1.5;display:flex;gap:9px;align-items:baseline;}
+  .hook .lbl{color:#e7c774;font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+
+  .foot{padding:16px 30px 24px;}
+  .end{text-align:center;color:var(--gold);letter-spacing:.4em;font-size:13px;margin:6px 0 8px;}
+  .sources{font-size:11.5px;color:var(--muted);line-height:1.5;text-align:center;}
+  @media (max-width:680px){.grid{grid-template-columns:1fr;}.stats{grid-template-columns:repeat(2,1fr);} .stat:nth-child(2){border-right:none;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="cover">
+    <div class="kicker">One-Page Learn &middot; The Halachos at a glance</div>
+    <div class="he">הִלְכוֹת בֵּית הַבְּחִירָה</div>
+    <div class="title">The Chosen Temple &middot; Chapters 2&ndash;4</div>
+    <div class="meta">Sefer Avodah &middot; The Altar &bull; The Menorah &amp; Vessels &bull; The Holy of Holies</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="n">1</div><div class="l">Fixed altar site,<br>never moved</div></div>
+    <div class="stat"><div class="n">42</div><div class="l">Menorah ornaments<br>22 &middot; 11 &middot; 9</div></div>
+    <div class="stat"><div class="n">100&sup3;</div><div class="l">Cubits: the Second<br>Temple building</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">Altar must-haves,<br>or it is invalid</div></div>
+  </div>
+
+  <!-- CH 2 : ALTAR -->
+  <div class="ch">
+    <div class="ch-head"><span class="ch-num">Ch 2</span><span class="ch-title">The Altar</span></div>
+    <div class="grid">
+      <div class="diagram">
+        <svg viewBox="0 0 240 190" xmlns="http://www.w3.org/2000/svg">
+          <line x1="6" y1="168" x2="234" y2="168" stroke="#d8cfba" stroke-width="1.5"/>
+          <!-- ramp -->
+          <polygon points="20,168 118,110 118,168" fill="#efe6d2" stroke="#c9b98d" stroke-width="1"/>
+          <text x="55" y="158" font-size="9" fill="#735C00">ramp</text>
+          <!-- altar tiers -->
+          <rect x="118" y="150" width="104" height="18" fill="#e7dcc2" stroke="#c9b98d"/>
+          <rect x="128" y="126" width="84" height="24" fill="#efe6d2" stroke="#c9b98d"/>
+          <rect x="136" y="104" width="68" height="22" fill="#f6efdf" stroke="#c9b98d"/>
+          <!-- horns -->
+          <rect x="136" y="94" width="12" height="12" fill="#B8860B"/>
+          <rect x="192" y="94" width="12" height="12" fill="#B8860B"/>
+          <!-- red band -->
+          <line x1="128" y1="138" x2="212" y2="138" stroke="#9c3b32" stroke-width="2.5"/>
+          <!-- labels -->
+          <text x="150" y="90" font-size="9" fill="#162839">horns</text>
+          <text x="214" y="140" font-size="9" fill="#9c3b32">red band</text>
+          <text x="150" y="163" font-size="9" fill="#735C00">base</text>
+          <!-- height bracket -->
+          <line x1="228" y1="94" x2="228" y2="168" stroke="#86868B" stroke-width="1"/>
+          <text x="210" y="80" font-size="9" fill="#86868B">10 cubits</text>
+        </svg>
+        <div class="dcap">Side view: base, ledge, horns, ramp</div>
+      </div>
+      <div>
+        <ul class="h">
+          <li><b>One unchangeable place.</b> The Altar stands in a single exact spot that may never move - where Abraham bound Isaac, and Adam, Noah, Cain and Abel offered before him. <span class="ref">(2:1-2)</span></li>
+          <li><b>Fixed by tradition.</b> Its dimensions may not be added to or reduced; returning prophets attested to its site and size. <span class="ref">(2:3-4)</span></li>
+          <li><b>Built in tiers.</b> A base, a surrounding ledge, and the top pyre surface; a scarlet band marks upper vs. lower blood. <span class="ref">(2:5-9)</span></li>
+          <li><b>One solid block.</b> Whole stones (never touched by iron), bound with lime, pitch and lead - no hollow inside. <span class="ref">(2:16)</span></li>
+        </ul>
+        <div class="hook"><span class="lbl">Remember</span><span>Four non-negotiables, or the Altar is invalid: <b>Horns &middot; Base &middot; Ramp &middot; Square.</b></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 3 : MENORAH -->
+  <div class="ch">
+    <div class="ch-head"><span class="ch-num">Ch 3</span><span class="ch-title">The Menorah, Table &amp; Vessels</span></div>
+    <div class="grid">
+      <div class="diagram">
+        <svg viewBox="0 0 240 190" xmlns="http://www.w3.org/2000/svg">
+          <!-- central shaft -->
+          <line x1="120" y1="40" x2="120" y2="150" stroke="#B8860B" stroke-width="4"/>
+          <!-- straight diagonal branches (Rambam) -->
+          <line x1="120" y1="120" x2="70" y2="60" stroke="#B8860B" stroke-width="3"/>
+          <line x1="120" y1="120" x2="170" y2="60" stroke="#B8860B" stroke-width="3"/>
+          <line x1="120" y1="110" x2="90" y2="60" stroke="#B8860B" stroke-width="3"/>
+          <line x1="120" y1="110" x2="150" y2="60" stroke="#B8860B" stroke-width="3"/>
+          <line x1="120" y1="100" x2="105" y2="60" stroke="#B8860B" stroke-width="3"/>
+          <line x1="120" y1="100" x2="135" y2="60" stroke="#B8860B" stroke-width="3"/>
+          <!-- lamp cups -->
+          <g fill="#735C00">
+            <circle cx="70" cy="56" r="5"/><circle cx="90" cy="56" r="5"/><circle cx="105" cy="56" r="5"/>
+            <circle cx="120" cy="52" r="5"/><circle cx="135" cy="56" r="5"/><circle cx="150" cy="56" r="5"/><circle cx="170" cy="56" r="5"/>
+          </g>
+          <!-- base / feet -->
+          <path d="M104,150 L136,150 L128,166 L112,166 Z" fill="#B8860B"/>
+          <line x1="112" y1="166" x2="104" y2="176" stroke="#B8860B" stroke-width="3"/>
+          <line x1="128" y1="166" x2="136" y2="176" stroke="#B8860B" stroke-width="3"/>
+        </svg>
+        <div class="dcap">Straight branches, per the Rambam</div>
+      </div>
+      <div>
+        <ul class="h">
+          <li><b>Exact count, or invalid.</b> <b>22</b> goblets, <b>11</b> bulbs, <b>9</b> flowers - 42 ornaments; if one is missing the whole Menorah is unfit. <span class="ref">(3:1-3)</span></li>
+          <li><b>One block of gold.</b> Hammered from a single piece, one talent (~68 kg) with its lamps - not assembled, not hollow, never from fragments. <span class="ref">(3:4-5)</span></li>
+          <li><b>The Showbread Table.</b> Gold side-frames and 28 gold rods hold two stacks of twelve loaves; two hall tables (marble in, gold out). <span class="ref">(3:12-16)</span></li>
+          <li><b>Incense altar &amp; washbasin.</b> A one-cubit incense altar between Table and Menorah; a basin with twelve taps for a whole shift of priests. <span class="ref">(3:17-18)</span></li>
+        </ul>
+        <div class="hook"><span class="lbl">Remember</span><span>One block, one talent, and the count <b>22 &middot; 11 &middot; 9</b> - lose one ornament, lose them all.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 4 : HOLY OF HOLIES -->
+  <div class="ch">
+    <div class="ch-head"><span class="ch-num">Ch 4</span><span class="ch-title">The Holy of Holies &amp; the Building</span></div>
+    <div class="grid">
+      <div class="diagram">
+        <svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg">
+          <!-- outer -->
+          <rect x="8" y="30" width="224" height="80" fill="none" stroke="#c9b98d" stroke-width="1.5"/>
+          <!-- Holy of Holies (west/left) -->
+          <rect x="8" y="30" width="60" height="80" fill="#efe6d2" stroke="#c9b98d"/>
+          <circle cx="30" cy="70" r="8" fill="#B8860B"/>
+          <text x="21" y="96" font-size="8" fill="#735C00">Ark on the</text>
+          <text x="19" y="104" font-size="8" fill="#735C00">found. stone</text>
+          <!-- curtains gap -->
+          <rect x="68" y="30" width="8" height="80" fill="#9c3b32" opacity="0.5"/>
+          <!-- Sanctuary -->
+          <rect x="76" y="30" width="110" height="80" fill="#f6efdf" stroke="#c9b98d"/>
+          <circle cx="100" cy="48" r="4" fill="#735C00"/><text x="108" y="51" font-size="7.5" fill="#735C00">Table</text>
+          <circle cx="100" cy="92" r="4" fill="#B8860B"/><text x="108" y="95" font-size="7.5" fill="#735C00">Menorah</text>
+          <rect x="150" y="66" width="8" height="8" fill="none" stroke="#735C00"/><text x="120" y="72" font-size="7.5" fill="#735C00">incense</text>
+          <!-- great gate + wickets -->
+          <rect x="184" y="60" width="4" height="20" fill="#162839"/>
+          <rect x="184" y="36" width="3" height="8" fill="#86868B"/>
+          <rect x="184" y="96" width="3" height="8" fill="#9c3b32"/>
+          <!-- Entrance hall -->
+          <rect x="188" y="30" width="44" height="80" fill="#efe6d2" stroke="#c9b98d"/>
+          <!-- labels -->
+          <text x="16" y="24" font-size="8" fill="#162839">Holy of Holies (20)</text>
+          <text x="104" y="24" font-size="8" fill="#162839">Sanctuary (40)</text>
+          <text x="192" y="24" font-size="8" fill="#162839">Ulam</text>
+          <text x="190" y="126" font-size="7.5" fill="#9c3b32">south wicket: never opened</text>
+        </svg>
+        <div class="dcap">Floor plan, east (right) to west</div>
+      </div>
+      <div>
+        <ul class="h">
+          <li><b>The Ark on the foundation stone.</b> It rests on the Even ha-Shtiyah in the western Holy of Holies - the stone from which the world was founded. <span class="ref">(4:1)</span></li>
+          <li><b>The hidden Ark.</b> Josiah entombed it in Solomon's vault; the Ark, manna, Aaron's staff and Urim v'Tumim did not return in the Second Temple. <span class="ref">(4:1)</span></li>
+          <li><b>The divider.</b> A stone wall in the First Temple; two curtains a cubit apart in the Second. <span class="ref">(4:2)</span></li>
+          <li><b>100 by 100 by 100.</b> Inside, east to west: Holy of Holies 20, curtain gap 1, Sanctuary 40. Two side-wickets flank the great gate - the southern one never opens. <span class="ref">(4:3-7)</span></li>
+        </ul>
+        <div class="hook"><span class="lbl">Remember</span><span>A <b>100-cubit cube</b>; the innermost <b>20</b> holds the Ark on the world's foundation stone.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="end">&#9670; &#9670; &#9670;</div>
+    <div class="sources">Mishneh Torah, Hilchot Beit HaBechirah, Chapters 2-4. A study overview, not a halachic ruling - consult a competent rav for practical questions.</div>
+  </div>
+
+</div>
+</body>
+</html>
