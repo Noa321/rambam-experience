@@ -17,6 +17,7 @@ interface ContentRecord {
   rambam_date: string;
   published_at: string;
   track?: string;
+  learn_html?: string | null;
 }
 
 function deriveLearnSlug(chapters: string): string {
@@ -59,7 +60,7 @@ export default async function LearnPage({
   const { data, error } = await supabase
     .from("content")
     .select(
-      "id,title,rambam_chapters,sefer,hilchot,hook,summary,media_url,rambam_date,published_at,track"
+      "id,title,rambam_chapters,sefer,hilchot,hook,summary,media_url,rambam_date,published_at,track,learn_html"
     )
     .eq("id", id)
     .single();
@@ -69,14 +70,19 @@ export default async function LearnPage({
   }
 
   const content = data as ContentRecord;
+
+  // Preferred path: the One-Page Learn HTML now lives on the content row
+  // (content.learn_html), so it renders directly with no storage fetch or
+  // re-skinning. Older days have no learn_html and fall back to the stored file.
+  let learnHtml: string | null = content.learn_html?.trim() || null;
+
   // 1-chapter-track files are stored with a "1ch-" slug prefix so the two cycles
   // never collide; mirror that here when reconstructing the storage path.
   const slugPrefix = content.track === "one-chapter" ? "1ch-" : "";
   const slug = slugPrefix + deriveLearnSlug(content.rambam_chapters);
   const learnUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://htwyavvzmcmlucpmqytb.supabase.co"}/storage/v1/object/public/media/learns/learn-${slug}.html`;
 
-  let learnHtml: string | null = null;
-  try {
+  if (!learnHtml) try {
     const res = await fetch(learnUrl, { next: { revalidate: 0 } });
     if (res.ok) {
       const fullHtml = await res.text();
