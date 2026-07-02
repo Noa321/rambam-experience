@@ -7,6 +7,8 @@ interface AudioPlayerProps {
   title: string;
 }
 
+const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
+
 export default function AudioPlayer({ src, title }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -53,14 +55,12 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
     }
   }, [isPlaying]);
 
-  const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2];
-
   const cycleSpeed = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    const currentIndex = speeds.indexOf(playbackRate);
-    const nextIndex = (currentIndex + 1) % speeds.length;
-    const nextSpeed = speeds[nextIndex];
+    const currentIndex = SPEEDS.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % SPEEDS.length;
+    const nextSpeed = SPEEDS[nextIndex];
     audio.playbackRate = nextSpeed;
     setPlaybackRate(nextSpeed);
   }, [playbackRate]);

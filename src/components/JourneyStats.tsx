@@ -16,8 +16,12 @@ export default function JourneyStats({ todayChapters = 3 }: { todayChapters?: nu
   };
 
   useEffect(() => {
+    // Progress lives in localStorage, which the server can't read — so the
+    // first client render must hydrate it in an effect. Same idiom as CaseGame.
+    /* eslint-disable react-hooks/set-state-in-effect */
     refresh();
     setReady(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   const toggle = () => {

@@ -2,7 +2,11 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { TRACKS, TRACK_LABEL, type Track } from "@/lib/track";
+import { TRACKS, TRACK_LABEL, TRACK_COOKIE, type Track } from "@/lib/track";
+
+function setTrackCookie(track: Track) {
+  document.cookie = `${TRACK_COOKIE}=${track}; path=/; max-age=31536000; samesite=lax`;
+}
 
 /**
  * Lets the reader switch between the two Rambam study cycles. The choice is
@@ -15,7 +19,7 @@ export default function TrackToggle({ active }: { active: Track }) {
 
   function choose(track: Track) {
     if (track === active || pending) return;
-    document.cookie = `rambam_track=${track}; path=/; max-age=31536000; samesite=lax`;
+    setTrackCookie(track);
     startTransition(() => router.refresh());
   }
 

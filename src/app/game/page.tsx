@@ -6,6 +6,19 @@ import CaseGame from "./CaseGame";
 
 export const dynamic = "force-dynamic";
 
+// Fisher-Yates shuffle, used so the three relevant principles are not always in
+// the fixed position they were authored in. Runs per request (this page is
+// force-dynamic), and the client renders the exact array it is handed, so
+// there is no hydration mismatch.
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export const metadata: Metadata = {
   title: "The Rambam Case",
   description: "A daily case to test your reasoning against the Rambam's Mishneh Torah",
@@ -122,16 +135,24 @@ export default async function GamePage() {
     .maybeSingle();
   if (contentRow) contentId = (contentRow as { id: string }).id;
 
-  // Shuffle the principle order so the three relevant ones are not always in a
-  // fixed position (they were authored first). Done here on the server (this
-  // page is force-dynamic) so each load gets a fresh random order and the
-  // client renders the same array it was handed — no hydration mismatch.
-  const shuffledPrinciples = [...puzzle.case_data.principles];
-  for (let i = shuffledPrinciples.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffledPrinciples[i], shuffledPrinciples[j]] = [shuffledPrinciples[j], shuffledPrinciples[i]];
-  }
-  const shuffledCaseData = { ...puzzle.case_data, principles: shuffledPrinciples };
+  // Randomize every answer position so authored order never gives the answer
+  // away: principles (relevant three were authored first), rulings (correct one
+  // often authored first), and each application's options (correct_index is
+  // remapped to follow its option). Scoring is unaffected — principles score by
+  // id, rulings by is_correct, applications by the remapped correct_index.
+  const shuffledCaseData = {
+    ...puzzle.case_data,
+    principles: shuffle(puzzle.case_data.principles),
+    rulings: shuffle(puzzle.case_data.rulings),
+    applications: puzzle.case_data.applications.map((app) => {
+      const order = shuffle(app.options.map((_, i) => i));
+      return {
+        ...app,
+        options: order.map((i) => app.options[i]),
+        correct_index: order.indexOf(app.correct_index),
+      };
+    }),
+  };
 
   return (
     <CaseGame
