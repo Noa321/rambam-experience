@@ -204,6 +204,12 @@ export default async function Home() {
   const todayChapters = today ? parseChaptersFromContent(today.rambam_chapters, today.hilchot, today.sefer) : [];
   const cyclePos = today ? cyclePositionFromContent(today.rambam_chapters, today.hilchot) : null;
 
+  // The real current day, independent of what content we found. If the newest
+  // published day is older than today (content is behind), we still show the
+  // true date and flag it — the app must never display a stale day as if current.
+  const actualToday = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const isStale = !!(today?.rambam_date && today.rambam_date < actualToday);
+
   return (
     <div className="min-h-screen pb-28">
       <Header />
@@ -216,10 +222,15 @@ export default async function Home() {
 
         {today ? (
           <>
-            {/* Date Header */}
+            {/* Date Header — always the real current day, never the content's stale date */}
             <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-gray mb-2" style={{ fontFamily: "var(--font-sans)" }}>
-              {formatDateUpper(today.rambam_date || today.published_at)}
+              {formatDateUpper(actualToday)}
             </p>
+            {isStale && (
+              <p className="text-[12px] text-muted-gray -mt-1 mb-4">
+                Today&#39;s learning is being prepared - showing the most recent day below.
+              </p>
+            )}
 
             {/* Journey strip */}
             {cyclePos && (
@@ -253,7 +264,7 @@ export default async function Home() {
                     className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-semibold tracking-[0.1em] uppercase mb-3"
                     style={{ backgroundColor: "rgba(184, 134, 11, 0.2)", color: "#ffe088", fontFamily: "var(--font-sans)" }}
                   >
-                    TODAY&#39;S LEARNING
+                    {isStale ? "MOST RECENT" : "TODAY’S LEARNING"}
                   </span>
                   <h2 className="font-serif font-bold text-[26px] leading-[32px] sm:text-[36px] sm:leading-[42px] mb-2">
                     {today.title}
