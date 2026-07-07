@@ -71,16 +71,18 @@ async function getTodaysContent(track: Track): Promise<ContentRecord | null> {
 
 async function getRecentContent(track: Track): Promise<ContentRecord[]> {
   const supabase = getSupabase();
-  const nowISO = new Date().toISOString();
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
+  // Buffer days are published ahead with future rambam_dates — never surface a
+  // day before its date arrives. Undated legacy essays stay included.
   const { data, error } = await supabase
     .from("content")
     .select("id,title,hook,summary,rambam_chapters,sefer,hilchot,media_url,rambam_date,published_at,body")
     .eq("content_type", "dvar_torah")
     .eq("status", "published")
     .eq("track", track)
-    .lte("published_at", nowISO)
-    .order("published_at", { ascending: false })
+    .or(`rambam_date.is.null,rambam_date.lte.${today}`)
+    .order("rambam_date", { ascending: false, nullsFirst: false })
     .limit(7);
 
   if (error || !data) return [];
