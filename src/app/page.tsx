@@ -1,6 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
 import { books } from "@/data/books";
-import { cyclePositionFromContent } from "@/lib/cycle";
+import { cyclePositionFromContent, resolveTreatiseId } from "@/lib/cycle";
 import { type Track } from "@/lib/track";
 import { getActiveTrack } from "@/lib/track-server";
 import Link from "next/link";
@@ -108,29 +108,10 @@ function formatShortDate(dateStr: string) {
   }).toUpperCase();
 }
 
-/* ── Treatise mappings ── */
-
-const HILCHOT_TO_TREATISE: Record<string, string> = {};
-for (const book of books) {
-  for (const t of book.treatises) {
-    HILCHOT_TO_TREATISE[t.name.toLowerCase()] = t.id;
-  }
-}
-const ALIASES: Record<string, string> = {
-  "sotah": "sotah", "issurei biah": "intercourse", "forbidden intercourse": "intercourse",
-  "chametz u\'matzah": "chametz", "chametz umatzah": "chametz",
-  "shofar, sukkah and lulav": "shofar", "shofar, sukkah, vlulav": "shofar",
-  "foundations of the torah": "foundations", "human dispositions": "dispositions",
-  "torah study": "torah-study", "foreign worship": "foreign-worship",
-  "reading the shema": "shema", "prayer": "prayer", "tefillin": "tefillin",
-  "fringes": "fringes", "blessings": "blessings", "circumcision": "circumcision",
-  "sabbath": "sabbath", "eruvin": "eruvin", "marriage": "marriage", "divorce": "divorce",
-  "forbidden foods": "forbidden-foods", "ritual slaughter": "slaughter", "repentance": "repentance",
-  "shechitah": "slaughter",
-  "maaser": "tithes", "tithes": "tithes",
-  "maaser sheini": "second-tithes", "maaser sheni": "second-tithes", "second tithes": "second-tithes",
-};
-for (const [alias, id] of Object.entries(ALIASES)) { HILCHOT_TO_TREATISE[alias] = id; }
+/* ── Treatise mappings ──
+   Name-to-id resolution lives in @/lib/cycle (resolveTreatiseId), which covers
+   every treatise and transliteration. Here we only keep the Sefaria URL names
+   for the reader links; anything missing falls back to underscored text. */
 
 const SEFARIA_NAMES: Record<string, string> = {
   "foundations": "Foundations_of_the_Torah",
@@ -156,6 +137,13 @@ const SEFARIA_NAMES: Record<string, string> = {
   "tithes": "Tithes",
   "second-tithes": "Second_Tithes",
   "sotah": "Sotah",
+  "yom-kippur": "Rest_on_the_Tenth_of_Tishrei",
+  "yom-tov": "Rest_on_a_Holiday",
+  "temple": "The_Chosen_Temple",
+  "vessels": "Vessels_of_the_Sanctuary_and_Those_Who_Serve_Therein",
+  "admission": "Admission_into_the_Sanctuary",
+  "forbidden-altar": "Things_Forbidden_on_the_Altar",
+  "sacrificial": "Sacrificial_Procedure",
 };
 
 interface ParsedChapter {
@@ -174,7 +162,7 @@ function parseChaptersFromContent(rambamChapters: string, hilchot: string, sefer
     if (!match) continue;
     const treatiseName = match[1].trim();
     const chapterStr = match[2].trim();
-    const treatiseId = HILCHOT_TO_TREATISE[treatiseName.toLowerCase()];
+    const treatiseId = resolveTreatiseId(treatiseName);
     if (!treatiseId) continue;
     let displayName = treatiseName;
     let bookEng = sefer;
